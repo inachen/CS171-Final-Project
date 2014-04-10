@@ -19,7 +19,7 @@ var graphVis = {
     x: 100,
     y: 10,
     w: width,
-    h: height
+    h: height - buttonh
 };
 
 var mapVis = {
@@ -30,8 +30,8 @@ var mapVis = {
 }
 
 var graphCanvas = d3.select("#graphVis").append("svg").attr({
-    width: width,
-    height: height - buttonh
+    width: width + margin.left + margin.right,
+    height: height - buttonh + margin.top + margin.bottom
     })
 
 var mapCanvas = d3.select("#mapVis").append("svg").attr({
@@ -46,6 +46,10 @@ var graphsvg = graphCanvas.append("g").attr({
 var mapsvg = mapCanvas.append("g").attr({
         transform: "translate(" + margin.left + "," + margin.top + ")"
     });
+
+// -----------------------------------
+// map vis
+// -----------------------------------
 
 var projection = d3.geo.mercator().scale(1).precision(.1);//.translate([width / 2, height / 2])
 var path = d3.geo.path().projection(projection);
@@ -138,3 +142,88 @@ function clicked(d) {
 // convert geojson to topojson: https://github.com/mbostock/topojson/wiki/Command-Line-Reference
 // chose mercator (good for cities)
 // finding long-lat: http://itouchmap.com/latlong.html
+
+// -----------------------------------
+// graph vis
+// -----------------------------------
+
+var pointRadius = 2
+
+createGraph = function(param,type) {
+    d3.json("dc_stats.json", function(error, data) {
+        
+        var dates = Object.keys(data).sort()
+        var objs = dates.map(function(d) {return data[d]})
+        var points = objs.map(function(d) {return d[param][type]})
+
+        var xScaleGraph = d3.time.scale()
+                        .domain([new Date(dates[0]),new Date(dates.last())])
+                        .range([(graphVis.x+margin.left),(margin.left + graphVis.x+graphVis.w-margin.right)])
+        
+        var yScaleGraph = d3.scale.linear()
+                        .domain([points.min(),points.max()])
+                        .range([graphVis.y+graphVis.h-margin.top,graphVis.y+margin.top])
+
+        console.log(objs)
+
+        xAxisGraph = d3.svg.axis()
+          .scale(xScaleGraph)
+          .orient("bottom");
+
+        yAxisGraph = d3.svg.axis()
+          .scale(yScaleGraph)
+          .orient("left");
+        
+        graphCanvas.selectAll('circle')
+            .data(objs)
+            .enter()
+            .append('circle')
+            .attr({
+                r: pointRadius,
+                cx: function(d){return xScaleGraph(new Date(d.date))},
+                cy: function(d){return yScaleGraph(d[param][type])},
+                fill: 'black'
+            })
+
+        console.log(xScaleGraph.range())
+        graphCanvas.append("g")
+            .classed("axis",true)
+            .call(xAxisGraph)
+            .attr("transform", "translate(" + 0 + "," + yScaleGraph.range()[0] + ")");
+
+
+        graphCanvas.append("g")
+            .classed("axis",true)
+            .call(yAxisGraph)
+            .attr("transform", "translate("+ xScaleGraph.range()[0] +"," + 0 + ")");
+
+
+    })
+}
+
+createGraph('rides','Casual');
+
+var convertToInt = function(s) {
+    return parseInt(s.replace(/,/g, ""), 10);
+};
+
+// method for getting min array element, arr.min()
+if (!Array.prototype.min){
+    Array.prototype.min = function(){
+        return Math.min.apply(null,this);
+    };
+};
+
+// method for getting max array element,  arr.max()
+if (!Array.prototype.max){
+    Array.prototype.max = function(){
+        return Math.max.apply(null,this);
+    };
+};
+
+// method for getting last array element
+if (!Array.prototype.last){
+    Array.prototype.last = function(){
+        return this[this.length - 1];
+    };
+};
