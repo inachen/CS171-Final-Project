@@ -61,10 +61,26 @@ createGraph = function(param,type) {
                         .range([(graphVis.x+margin.left),(margin.left + graphVis.x+graphVis.w-margin.right)])
         
         var yScaleGraph = d3.scale.linear()
-                        .domain([points.min(),points.max()])
+                        .domain([(points.min()*0.9),(points.max()*1.1)])
                         .range([graphVis.y+graphVis.h-margin.top,graphVis.y+margin.top])
+/*
+        lineFunc = function('')
+        {
+            d3.svg.line()
+             .x(function(d,i) { return xScaleDet(dataSet["Ana"][dataSet["Wom"].indexOf(d)]); })
+             .y(function(d,i) { return yScaleDet(d); })
+             .interpolate("linear");
+        }
+*/
+        interpolateLinear = function(point_arr) {
+          return point_arr.join("L");
+        }
 
-        console.log(objs)
+        console.log(interpolateLinear)
+
+        var point_pairs = points.map(function(d,i) {return [xScaleGraph(new Date(dates[i])),yScaleGraph(d)]})
+
+        console.log(interpolateLinear(point_pairs))
 
         xAxisGraph = d3.svg.axis()
           .scale(xScaleGraph)
@@ -73,7 +89,8 @@ createGraph = function(param,type) {
         yAxisGraph = d3.svg.axis()
           .scale(yScaleGraph)
           .orient("left");
-        
+
+
         graphCanvas.selectAll('circle')
             .data(objs)
             .enter()
@@ -85,7 +102,10 @@ createGraph = function(param,type) {
                 fill: 'black'
             })
 
-
+        graphCanvas.append('path')
+            .attr('d','M' + interpolateLinear(point_pairs))
+            .attr('fill','none')
+            .attr('stroke','black')
 
 
 
