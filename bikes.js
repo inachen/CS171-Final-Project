@@ -65,6 +65,31 @@ var station_tip = d3.tip()
 
 mapsvg.call(station_tip);
 
+var convertToInt = function(s) {
+    return parseInt(s.replace(/,/g, ""), 10);
+};
+
+// method for getting min array element, arr.min()
+if (!Array.prototype.min){
+    Array.prototype.min = function(){
+        return Math.min.apply(null,this);
+    };
+};
+
+// method for getting max array element,  arr.max()
+if (!Array.prototype.max){
+    Array.prototype.max = function(){
+        return Math.max.apply(null,this);
+    };
+};
+
+// method for getting last array element
+if (!Array.prototype.last){
+    Array.prototype.last = function(){
+        return this[this.length - 1];
+    };
+};
+
 function loadStations() {
     d3.csv("/data/dc-stations.csv",function(error,data){
         mapsvg.selectAll(".station")
@@ -172,18 +197,27 @@ d3.json("/data/washington.json", function(error, data) {
 
 var pointRadius = 2
 
+var xScaleGraph, yScaleGraph;
+
+var dc_data = {};
+
 createGraph = function(param,type) {
     d3.json("dc_stats.json", function(error, data) {
         
+        dc_data = data;
+
+        console.log(dc_data);
+
         var dates = Object.keys(data).sort()
         var objs = dates.map(function(d) {return data[d]})
         var points = objs.map(function(d) {return d[param][type]})
 
-        var xScaleGraph = d3.time.scale()
-                        .domain([new Date(dates[0]),new Date(dates.last())])
+
+        xScaleGraph = d3.time.scale()
+                        .domain([new Date(dates[0]),new Date(dates[dates.length-1])])
                         .range([(graphVis.x+margin.left),(margin.left + graphVis.x+graphVis.w-margin.right)])
         
-        var yScaleGraph = d3.scale.linear()
+        yScaleGraph = d3.scale.linear()
             .domain([(points.min()*0.9),(points.max()*1.1)])
             .range([graphVis.y+graphVis.h-margin.top-300,graphVis.y+margin.top])
 /*
@@ -199,18 +233,14 @@ createGraph = function(param,type) {
           return point_arr.join("L");
         }
 
-
-        console.log(interpolateLinear)
-
         var point_pairs = points.map(function(d,i) {return [xScaleGraph(new Date(dates[i])),yScaleGraph(d)]})
 
-        console.log(interpolateLinear(point_pairs))
 
-        xAxisGraph = d3.svg.axis()
+        var xAxisGraph = d3.svg.axis()
           .scale(xScaleGraph)
           .orient("bottom");
 
-        yAxisGraph = d3.svg.axis()
+        var yAxisGraph = d3.svg.axis()
           .scale(yScaleGraph)
           .orient("left");
 
@@ -219,6 +249,7 @@ createGraph = function(param,type) {
             .data(objs)
             .enter()
             .append('circle')
+            .classed('dc',true)
             .attr({
                 r: pointRadius,
                 cx: function(d){return xScaleGraph(new Date(d.date))},
@@ -227,18 +258,19 @@ createGraph = function(param,type) {
             })
 
         graphCanvas.append('path')
+            .classed('dc',true)
             .attr('d','M' + interpolateLinear(point_pairs))
             .attr('fill','none')
             .attr('stroke','black')
 
         graphCanvas.append("g")
-            .classed("axis",true)
+            .classed("xaxis",true)
             .call(xAxisGraph)
             .attr("transform", "translate(" + 0 + "," + yScaleGraph.range()[0] + ")");
 
 
         graphCanvas.append("g")
-            .classed("axis",true)
+            .classed("yaxis",true)
             .call(yAxisGraph)
             .attr("transform", "translate("+ xScaleGraph.range()[0] +"," + 0 + ")");
 
@@ -246,29 +278,90 @@ createGraph = function(param,type) {
     })
 }
 
-createGraph('rides','Casual');
 
-var convertToInt = function(s) {
-    return parseInt(s.replace(/,/g, ""), 10);
-};
+var updateGraph = function(param,type)
+{
+    var dates = Object.keys(dc_data).sort()
+    var objs = dates.map(function(d) {return dc_data[d]})
+    var points = objs.map(function(d) {return d[param][type]})
 
-// method for getting min array element, arr.min()
-if (!Array.prototype.min){
-    Array.prototype.min = function(){
-        return Math.min.apply(null,this);
-    };
-};
+    
+    xScaleGraph = d3.time.scale()
+                    .domain([new Date(dates[0]),new Date(dates.last())])
+                    .range([(graphVis.x+margin.left),(margin.left + graphVis.x+graphVis.w-margin.right)])
+        
+    yScaleGraph = d3.scale.linear()
+        .domain([(points.min()*0.9),(points.max()*1.1)])
+        .range([graphVis.y+graphVis.h-margin.top-300,graphVis.y+margin.top])
 
-// method for getting max array element,  arr.max()
-if (!Array.prototype.max){
-    Array.prototype.max = function(){
-        return Math.max.apply(null,this);
-    };
-};
 
-// method for getting last array element
-if (!Array.prototype.last){
-    Array.prototype.last = function(){
-        return this[this.length - 1];
-    };
-};
+
+
+    graphCanvas.selectAll("circle")
+        .data(objs)
+        .attr('cx', function(d){return xScaleGraph(new Date(d.date))})
+        .attr('cy', function(d){return yScaleGraph(d[param][type])})
+        .attr('fill', 'black')
+        .attr('r', 2)
+        .transition(500)
+
+    xAxisGraph = d3.svg.axis()
+      .scale(xScaleGraph)
+      .orient("bottom");
+
+    yAxisGraph = d3.svg.axis()
+      .scale(yScaleGraph)
+      .orient("left");
+
+
+
+    interpolateLinear = function(point_arr) {
+      return point_arr.join("L");
+    }
+
+    var point_pairs = points.map(function(d,i) {return [xScaleGraph(new Date(dates[i])),yScaleGraph(d)]})
+
+    d3.selectAll('path.dc')
+        .attr('d','M' + interpolateLinear(point_pairs))
+        .attr('fill','none')
+        .attr('stroke','black')
+
+
+    d3.selectAll('.xaxis')
+        .call(xAxisGraph)
+        .attr("transform", "translate(" + 0 + "," + yScaleGraph.range()[0] + ")")
+        .transition(500)
+
+
+
+    d3.selectAll('.yaxis')
+        .call(yAxisGraph)
+        .attr("transform", "translate("+ xScaleGraph.range()[0] +"," + 0 + ")")
+        .transition(500)
+
+
+}
+
+createGraph('rides','Subscriber');
+
+console.log(dc_data)
+
+
+
+
+
+
+d3.select("input[value=\"dist\"]").on("click", function(){updateGraph('dist','Casual');});
+d3.select("input[value=\"speed\"]").on("click", function(){updateGraph('speed','Casual');});
+d3.select("input[value=\"rides\"]").on("click", function(){updateGraph('rides','Casual')});
+d3.select("input[value=\"time\"]").on("click", function(){updateGraph('time','Casual')});
+
+
+d3.select("input[value=\"Subscriber\"]").on("click", function(){updateGraph('dist','Subscriber')});
+d3.select("input[value=\"Casual\"]").on("click", function(){updateGraph('dist','Casual')});
+
+
+
+
+
+
