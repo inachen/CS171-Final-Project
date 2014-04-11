@@ -1,0 +1,11 @@
+Partner Group: Renzo Lucioni and Kathy Lin
+
+Comments:
+1. Choose granularity of aggregation for map data such that it would reduce the data size
+    - we worked on this and found that we were able to significantly reduce data size
+2. Think about interaction between the two visualizations
+    - this may be difficult since the two visualizations looked at completely different data sets
+3. Clearly demarcate what days are weekend and weekdays, and which rides are done by 'Casual' vs 'Subscriber' users
+    - we will soon apply this to our simple line graph, but for now 
+4. Add context and focus
+    - we were going to do this
