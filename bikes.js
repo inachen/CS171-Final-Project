@@ -202,7 +202,8 @@ var xScaleGraph, yScaleGraph;
 var dc_data = {};
 
 createGraph = function(param,type) {
-    d3.json("dc_stats.json", function(error, data) {
+    jQuery.ajax({url:"dc_stats.json",async:false,success:function(data)  
+    {
         
         dc_data = data;
 
@@ -275,7 +276,7 @@ createGraph = function(param,type) {
             .attr("transform", "translate("+ xScaleGraph.range()[0] +"," + 0 + ")");
 
 
-    })
+    }})
 }
 
 
