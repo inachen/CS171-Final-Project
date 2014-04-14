@@ -201,6 +201,10 @@ var xScaleGraph, yScaleGraph;
 
 var dc_data = {};
 
+interpolateLinear = function(point_arr) {
+  return point_arr.join("L");
+}
+
 createGraph = function(param,type) {
     jQuery.ajax({url:"dc_stats.json",async:false,success:function(data)  
     {
@@ -221,18 +225,8 @@ createGraph = function(param,type) {
         yScaleGraph = d3.scale.linear()
             .domain([(points.min()*0.9),(points.max()*1.1)])
             .range([graphVis.y+graphVis.h-margin.top-300,graphVis.y+margin.top])
-/*
-        lineFunc = function('')
-        {
-            d3.svg.line()
-             .x(function(d,i) { return xScaleDet(dataSet["Ana"][dataSet["Wom"].indexOf(d)]); })
-             .y(function(d,i) { return yScaleDet(d); })
-             .interpolate("linear");
-        }
-*/
-        interpolateLinear = function(point_arr) {
-          return point_arr.join("L");
-        }
+
+
 
         var point_pairs = points.map(function(d,i) {return [xScaleGraph(new Date(dates[i])),yScaleGraph(d)]})
 
@@ -265,12 +259,14 @@ createGraph = function(param,type) {
             .attr('stroke','black')
 
         graphCanvas.append("g")
+            .classed("axis",true)
             .classed("xaxis",true)
             .call(xAxisGraph)
             .attr("transform", "translate(" + 0 + "," + yScaleGraph.range()[0] + ")");
 
 
         graphCanvas.append("g")
+            .classed("axis",true)
             .classed("yaxis",true)
             .call(yAxisGraph)
             .attr("transform", "translate("+ xScaleGraph.range()[0] +"," + 0 + ")");
@@ -299,12 +295,12 @@ var updateGraph = function(param,type)
 
 
     graphCanvas.selectAll("circle")
-        .data(objs)
+        .transition()
         .attr('cx', function(d){return xScaleGraph(new Date(d.date))})
         .attr('cy', function(d){return yScaleGraph(d[param][type])})
         .attr('fill', 'black')
         .attr('r', 2)
-        .transition(500)
+        
 
     xAxisGraph = d3.svg.axis()
       .scale(xScaleGraph)
@@ -314,31 +310,28 @@ var updateGraph = function(param,type)
       .scale(yScaleGraph)
       .orient("left");
 
-
-
-    interpolateLinear = function(point_arr) {
-      return point_arr.join("L");
-    }
-
-    var point_pairs = points.map(function(d,i) {return [xScaleGraph(new Date(dates[i])),yScaleGraph(d)]})
+    var dc_point_pairs = points.map(function(d,i) {return [xScaleGraph(new Date(dates[i])),yScaleGraph(d)]})
 
     d3.selectAll('path.dc')
-        .attr('d','M' + interpolateLinear(point_pairs))
+        .transition()
+        .attr('d','M' + interpolateLinear(dc_point_pairs))
         .attr('fill','none')
         .attr('stroke','black')
 
 
     d3.selectAll('.xaxis')
+        .transition()
         .call(xAxisGraph)
         .attr("transform", "translate(" + 0 + "," + yScaleGraph.range()[0] + ")")
-        .transition(500)
+        
 
 
 
     d3.selectAll('.yaxis')
+        .transition()
         .call(yAxisGraph)
         .attr("transform", "translate("+ xScaleGraph.range()[0] +"," + 0 + ")")
-        .transition(500)
+        
 
 
 }
