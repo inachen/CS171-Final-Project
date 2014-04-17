@@ -201,6 +201,10 @@ var xScaleGraph, yScaleGraph;
 
 var dc_data = {};
 
+var graphType = 'Casual'
+
+var graphStat = 'dist'
+
 interpolateLinear = function(point_arr) {
   return point_arr.join("L");
 }
@@ -209,6 +213,9 @@ createGraph = function(param,type) {
     jQuery.ajax({url:"dc_stats.json",async:false,success:function(data)  
     {
         
+        graphType = type
+        graphStat = param
+
         dc_data = data;
 
         console.log(dc_data);
@@ -336,7 +343,7 @@ var updateGraph = function(param,type)
 
 }
 
-createGraph('rides','Subscriber');
+createGraph('rides','Casual');
 
 console.log(dc_data)
 
@@ -345,14 +352,14 @@ console.log(dc_data)
 
 
 
-d3.select("input[value=\"dist\"]").on("click", function(){updateGraph('dist','Casual');});
-d3.select("input[value=\"speed\"]").on("click", function(){updateGraph('speed','Casual');});
-d3.select("input[value=\"rides\"]").on("click", function(){updateGraph('rides','Casual')});
-d3.select("input[value=\"time\"]").on("click", function(){updateGraph('time','Casual')});
+d3.select("input[value=\"dist\"]").on("click", function(){updateGraph('dist',graphType);});
+d3.select("input[value=\"speed\"]").on("click", function(){updateGraph('speed',graphType);});
+d3.select("input[value=\"rides\"]").on("click", function(){updateGraph('rides',graphType)});
+d3.select("input[value=\"time\"]").on("click", function(){updateGraph('time',graphType)});
 
 
-d3.select("input[value=\"Subscriber\"]").on("click", function(){updateGraph('dist','Subscriber')});
-d3.select("input[value=\"Casual\"]").on("click", function(){updateGraph('dist','Casual')});
+d3.select("input[value=\"Subscriber\"]").on("click", function(){updateGraph(graphStat,'Subscriber')});
+d3.select("input[value=\"Casual\"]").on("click", function(){updateGraph(graphStat,'Casual')});
 
 
 
