@@ -1,0 +1,132 @@
+,id,lat,lon,name
+0,3,42.340021,-71.100812,Colleges of the Fenway
+1,4,42.345392,-71.069616,Tremont St. at Berkeley St.
+2,5,42.341814,-71.090179,Northeastern U / North Parking Lot
+3,6,42.361284999999995,-71.06514,Cambridge St. at Joy St.
+4,7,42.353412,-71.044624,Fan Pier
+5,8,42.353334000000004,-71.137313,Union Square - Brighton Ave. at Cambridge St.
+6,9,42.351313,-71.116174,Agganis Arena - 925 Comm Ave.
+7,10,42.350075,-71.105884,B.U. Central - 725 Comm. Ave.
+8,11,42.338629,-71.1065,Longwood Ave / Binney St
+9,12,42.335910999999996,-71.08849599999999,Ruggles Station / Columbus Ave.
+10,14,42.337171000000005,-71.102797,HMS / HSPH - Ave. Louis Pasteur at Longwood Ave.
+11,15,42.361667,-71.13802,Harvard Real Estate - Brighton Mills - 370 Western Ave
+12,16,42.347433,-71.076163,Back Bay / South End Station
+13,17,42.365074,-71.11958100000001,Harvard University Housing - 111 Western Ave. at Soldiers Field Park
+14,18,42.36337,-71.129791,Harvard Real Estate - 219 Western Ave. at North Harvard St.
+15,19,42.347527,-71.105828,Buswell Park
+16,20,42.359770000000005,-71.051601,Aquarium Station - 200 Atlantic Ave.
+17,21,42.345959,-71.082578,Prudential Center / Belvidere
+18,22,42.352175,-71.055547,South Station - 700 Atlantic Ave.
+19,24,42.351821,-71.045461,Seaport Square - Seaport Blvd. at Boston Wharf
+20,25,42.341332,-71.076847,Tremont St / W Newton St
+21,26,42.341522,-71.068922,Washington St. at Waltham St.
+22,27,42.331567,-71.094734,Roxbury Crossing Station
+23,29,42.363732,-71.124565,Innovation Lab - 125 Western Ave. at Batten Way
+24,30,42.334073,-71.105221,Brigham Cir / Huntington Ave
+25,31,42.348833,-71.041747,Seaport Hotel
+26,32,42.343911999999996,-71.102221,Landmark Centre
+27,33,42.349046,-71.09683100000001,Kenmore Sq / Comm Ave
+28,34,42.346171000000005,-71.099855,Overland St at Brookline Ave
+29,36,42.349672999999996,-71.077303,Boston Public Library - 700 Boylston St.
+30,39,42.338623,-71.074182,Washington St. at Rutland St.
+31,40,42.363871,-71.050877,Lewis Wharf - Atlantic Ave.
+32,41,42.352261,-71.12383100000001,Packard's Corner - Comm. Ave. at Brighton Ave.
+33,42,42.352096,-71.070378,Boylston St. at Arlington St.
+34,43,42.357143,-71.050699,Rowes Wharf - Atlantic Ave
+35,44,42.360583,-71.05686800000001,Faneuil Hall - Union St. at North St.
+36,45,42.344763,-71.09788,Yawkey Way at Boylston St.
+37,46,42.343864,-71.085918,Christian Science Plaza
+38,47,42.362811,-71.056067,Cross St. at Hanover St.
+39,48,42.356755,-71.05540699999999,Post Office Square
+40,49,42.351146,-71.066289,Stuart St. at Charles St.
+41,50,42.350989,-71.07364399999999,Boylston St / Berkeley St
+42,51,42.3348756,-71.07909690000001,Washington St. at Lenox St.
+43,52,42.348717,-71.085954,Newbury St / Hereford St
+44,53,42.350851,-71.08988599999999,Beacon St / Mass Ave
+45,54,42.354979,-71.063348,Tremont St / West St
+46,55,42.347265,-71.088088,Boylston / Mass Ave
+47,57,42.340799,-71.081572,Columbus Ave. at Mass. Ave.
+48,58,42.355596000000006,-71.07278000000001,The Esplanade - Beacon St. at Arlington St.
+49,59,42.351356,-71.05936700000001,Chinatown Gate Plaza - Surface Rd. at Beach St.
+50,62,42.340299,-71.109927,Longwood Ave/Riverway
+51,63,42.344023,-71.05705400000001,Dorchester Ave. at Gillette Park
+52,64,42.3511,-71.0496,Congress / Sleeper
+53,65,42.3475,-71.0441,Boston Convention & Exhibition Center
+54,66,42.348607,-71.13401,Allston Green District - Commonwealth Ave & Griggs St
+55,67,42.3581,-71.093198,MIT at Mass Ave / Amherst St
+56,68,42.36507,-71.1031,Central Square at Mass Ave / Essex St
+57,69,42.341598,-71.123338,Coolidge Corner - Beacon St @ Centre St
+58,70,42.372244,-71.121851,Harvard Kennedy School at Bennett St / Eliot St
+59,71,42.383404999999996,-71.10759300000001,Conway Park - Somerville Avenue
+60,72,42.362613,-71.08410500000001,One Broadway / Kendall Sq at Main St / 3rd St
+61,73,42.373231,-71.120886,Harvard Square at Brattle St / Eliot St
+62,74,42.373267999999996,-71.118579,Harvard Square at Mass Ave/ Dunster
+63,75,42.363562,-71.10042,Lafayette Square at Mass Ave / Main St / Columbia St
+64,76,42.366426000000004,-71.10549499999999,Central Sq Post Office / Cambridge City Hall at Mass Ave / Pleasant St
+65,77,42.386428,-71.096413,Somerville City Hall
+66,78,42.379637,-71.09531899999999,Union Square - Somerville
+67,79,42.378551,-71.106541,Beacon St at Washington / Kirkland
+68,80,42.362429,-71.090188,MIT Stata Center at Vassar St / Main St
+69,81,42.352409,-71.062679,Boylston St / Washington St
+70,83,42.325941,-71.065928,South Bay Plaza
+71,84,42.366981,-71.076472,CambridgeSide Galleria - CambridgeSide PL at Land Blvd
+72,86,42.332799,-71.11620500000001,Brookline Village - Station Street @ MBTA
+73,87,42.366621,-71.114214,Harvard University Housing - 115 Putnam Ave at Peabody Terrace
+74,88,42.374035,-71.101427,Inman Square at Vellucci Plaza / Hampshire St
+75,89,42.379011,-71.119945,Harvard Law School at Mass Ave / Jarvis St
+76,90,42.3707,-71.07711,Lechmere Station at Cambridge St / First St
+77,91,42.366277000000004,-71.09169,One Kendall Square at Hampshire St / Portland St
+78,92,42.311819,-71.03570500000001,University of Massachusetts Boston
+79,93,42.320494000000004,-71.05112199999999,JFK / UMASS Station
+80,94,42.375603000000005,-71.06460799999999,Charlestown - Main St at Austin St
+81,95,42.372969,-71.094445,Cambridge St - at Columbia St / Webster Ave
+82,96,42.373379,-71.111075,Cambridge Main Library at Broadway / Trowbridge St
+83,98,42.371848,-71.060292,Charlestown - Warren St at Chelsea St
+84,99,42.35892,-71.057629,Mayor Thomas M. Menino - Government Center
+85,100,42.328654,-71.084198,Dudley Square
+86,101,42.345733,-71.10069399999999,BIDMC - Brookline at Burlington St
+87,102,42.336437,-71.073089,Boston Medical Center -  East Concord at Harrison Ave
+88,103,42.348762,-71.082383,Boylston at Fairfield
+89,104,42.330715999999995,-71.05704399999999,Andrew Station - Dorchester Ave at Humboldt Pl
+90,105,42.325333,-71.075354,Mt Pleasant Ave / Dudley Town Common
+91,106,42.335693,-71.045859,West Broadway at Dorchester St
+92,107,42.335741,-71.03877,South Boston Library - 646 East Broadway
+93,108,42.320561,-71.06198,E. Cottage St at Columbia Rd
+94,109,42.317225,-71.065421,Upham's Corner - Ramsey St at Dudley St
+95,110,42.356975,-71.145442,New Balance - Guest St. at Life St.
+96,111,42.366222,-71.059914,TD Garden - Causeway at Portal Park #2
+97,112,42.355402000000005,-71.058087,Franklin St. / Arch St.
+98,113,42.360690000000005,-71.07088399999999,Charles Circle - Charles St. at Cambridge St.
+99,114,42.365942,-71.06051500000001,TD Garden - Causeway at Portal Park #1
+100,115,42.378338,-71.048927,Spaulding Rehabilitation Hospital - Charlestown Navy Yard
+101,116,42.356052000000005,-71.069849,Charles St at Beacon St
+102,117,42.358508,-71.052984,Milk St at India St
+103,118,42.377022,-71.056605,Hayes Square at Vine St.
+104,119,42.350413,-71.07655,New Balance Store - Boylston at Dartmouth
+105,120,42.309467,-71.115645,JP Monument - South St at Centre St
+106,121,42.31309,-71.114175,JP Centre - Centre Street at Myrtle Street
+107,122,42.320997999999996,-71.110833,Hyde Square at Barbara St
+108,123,42.315692,-71.09863399999999,Egleston Square at Columbus Ave
+109,124,42.310579,-71.107341,Green St T
+110,125,42.322913,-71.100164,Jackson Square T at Centre St
+111,126,42.339335,-71.13493000000001,Washington Square at Washington St. / Beacon St.
+112,127,42.346563,-71.128374,JFK Crossing at Harvard St. / Thorndike St.
+113,128,42.362457,-71.08497,Kendall T at Main St
+114,129,42.369832,-71.118201,Harvard University River Houses / Plympton St at Memorial Drive
+115,130,42.376369,-71.114025,Harvard University Gund Hall at Quincy St / Kirkland S
+116,131,42.356953999999995,-71.113687,Lower Cambridgeport at Magazine St/Riverside Rd
+117,132,42.377945000000004,-71.116865,Harvard University / SEAS Cruft-Pierce Halls at 29 Oxford St
+118,133,42.380287,-71.125107,Harvard University Radcliffe Quadrangle at Shepard St / Garden St
+119,134,42.397828000000004,-71.130516,Mass Ave / Linear Park
+120,135,42.370803,-71.104412,359 Broadway - Broadway at Fayette Street
+121,136,42.366095,-71.086388,Biogen Idec - Binney St / Sixth St
+122,137,42.387995000000004,-71.119084,Porter Square Station
+123,138,42.385582,-71.113341,Wilson Square
+124,139,42.396969,-71.123024,Davis Square
+125,140,42.400146,-71.112708,Ball Square
+126,141,42.400877,-71.116772,Powder House Circle
+127,142,42.40449,-71.123413,Packard Ave / Powderhouse Blvd
+128,143,42.39082,-71.10942,Somerville Hospital at Highland Ave / Crocker St
+129,144,42.402763,-71.126908,Teele Square at 239 Holland St
+130,145,42.394002,-71.120406,Summer St at Cutter St
