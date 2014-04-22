@@ -199,7 +199,10 @@ var pointRadius = 2
 
 var xScaleGraph, yScaleGraph;
 
-var dc_data = {};
+var graphData = {};
+
+
+
 
 var graphType = 'Casual'
 
@@ -209,34 +212,68 @@ interpolateLinear = function(point_arr) {
   return point_arr.join("L");
 }
 
+var graphObjs = {};
+var graphDates = {};
+
+var dc_dates,dc_objs,dc_points,chi_dates,chi_objs,chi_points,bos_dates,bos_objs,bos_points,dates,points,xScaleGraph,yScaleGraph;
+
 createGraph = function(param,type) {
-    jQuery.ajax({url:"dc_stats.json",async:false,success:function(data)  
+
+    jQuery.ajax({url:"./combo_stats.json",async:false,success:function(data)
     {
-        
+        var graphPoints= {}
+        var graphPointPairs = {}
+
         graphType = type
         graphStat = param
 
-        dc_data = data;
-
-        console.log(dc_data);
-
-        var dates = Object.keys(data).sort()
-        var objs = dates.map(function(d) {return data[d]})
-        var points = objs.map(function(d) {return d[param][type]})
+        graphData['dc'] = data['dc'];
+        graphData['chi'] = data['chi'];
+        graphData['bos'] = data['bos'];
 
 
-        xScaleGraph = d3.time.scale()
+        console.log(data,Object.keys(graphData));
+
+
+
+        for (key in Object.keys(graphData))
+        {
+            if (typeof graphData[Object.keys(graphData)[key]] == "object")
+            {
+                key = Object.keys(graphData)[key]
+                console.log(key)
+                graphDates[key] = Object.keys(graphData[key]).sort()
+                graphObjs[key] = graphDates[key].map(function(d) {return graphData[key][d]})
+                graphPoints[key] = graphObjs[key].map(function(d) {return d[param][type]})
+            }  
+
+        }
+
+        console.log(graphDates,graphObjs,graphPoints)
+
+        var dates_arrs = Object.keys(graphDates).map(function (key) {
+            return graphDates[key]
+        })
+
+        var dates = [];
+        dates = dates.concat.apply(dates, dates_arrs).sort();
+        console.log(dates)
+
+        var points_arrs = Object.keys(graphPoints).map(function (key) {
+            return graphPoints[key]
+        })
+        console.log(points_arrs)
+        var points = [];
+        points = points.concat.apply(points, points_arrs).sort();
+        console.log(points)
+
+        var xScaleGraph = d3.time.scale()
                         .domain([new Date(dates[0]),new Date(dates[dates.length-1])])
                         .range([(graphVis.x+margin.left),(margin.left + graphVis.x+graphVis.w-margin.right)])
         
-        yScaleGraph = d3.scale.linear()
+        var yScaleGraph = d3.scale.linear()
             .domain([(points.min()*0.9),(points.max()*1.1)])
             .range([graphVis.y+graphVis.h-margin.top-300,graphVis.y+margin.top])
-
-
-
-        var point_pairs = points.map(function(d,i) {return [xScaleGraph(new Date(dates[i])),yScaleGraph(d)]})
-
 
         var xAxisGraph = d3.svg.axis()
           .scale(xScaleGraph)
@@ -246,24 +283,48 @@ createGraph = function(param,type) {
           .scale(yScaleGraph)
           .orient("left");
 
+        for (key in Object.keys(graphData))
+        {
+            if (typeof graphData[Object.keys(graphData)[key]] == "object")
+            {
+                key = Object.keys(graphData)[key]
+                graphPointPairs[key] = graphPoints[key].map(function(d,i) {return [xScaleGraph(new Date(graphDates[key][i])),yScaleGraph(d)]})
 
-        graphCanvas.selectAll('circle')
-            .data(objs)
-            .enter()
-            .append('circle')
-            .classed('dc',true)
-            .attr({
-                r: pointRadius,
-                cx: function(d){return xScaleGraph(new Date(d.date))},
-                cy: function(d){return yScaleGraph(d[param][type])},
-                fill: 'black'
-            })
+                graphCanvas.selectAll('circle.'+key)
+                    .data(graphObjs[key])
+                    .enter()
+                    .append('circle')
+                    .classed(key,true)
+                    .attr({
+                        r: pointRadius,
+                        cx: function(d){return xScaleGraph(new Date(d.date))},
+                        cy: function(d){return yScaleGraph(d[param][type])},
+                        fill: function(d) 
+                        {
+                            if (key =='dc')
+                                return 'red'
+                            else if (key =='bos')
+                                return 'green'
+                            else if (key == 'chi')
+                                return 'blue'
+                        }
+                    })
 
-        graphCanvas.append('path')
-            .classed('dc',true)
-            .attr('d','M' + interpolateLinear(point_pairs))
-            .attr('fill','none')
-            .attr('stroke','black')
+                graphCanvas.append('path')
+                    .classed(key,true)
+                    .attr('d','M' + interpolateLinear(graphPointPairs[key]))
+                    .attr('fill','none')
+                    .attr('stroke',function(d) 
+                        {
+                            if (key =='dc')
+                                return 'red'
+                            else if (key =='bos')
+                                return 'green'
+                            else if (key == 'chi')
+                                return 'blue'
+                        })
+            }
+        }
 
         graphCanvas.append("g")
             .classed("axis",true)
@@ -278,18 +339,46 @@ createGraph = function(param,type) {
             .call(yAxisGraph)
             .attr("transform", "translate("+ xScaleGraph.range()[0] +"," + 0 + ")");
 
-
     }})
 }
 
 
 var updateGraph = function(param,type)
 {
-    var dates = Object.keys(dc_data).sort()
-    var objs = dates.map(function(d) {return dc_data[d]})
-    var points = objs.map(function(d) {return d[param][type]})
-
+    graphType = type
+    graphStat = param
     
+    var graphPoints= {}
+    var graphPointPairs = {}
+
+    for (key in Object.keys(graphData))
+    {
+        if (typeof graphData[Object.keys(graphData)[key]] == "object")
+        {
+            key = Object.keys(graphData)[key]
+            graphPoints[key] = graphObjs[key].map(function(d) {return d[param][type]})
+        }  
+
+    }
+
+    var dates_arrs = Object.keys(graphDates).map(function (key) {
+        return graphDates[key]
+    })
+
+    var dates = [];
+    dates = dates.concat.apply(dates, dates_arrs).sort();
+    console.log(dates)
+
+
+    var points_arrs = Object.keys(graphPoints).map(function (key) {
+            return graphPoints[key]
+        })
+    console.log(points_arrs)
+    var points = [];
+    points = points.concat.apply(points, points_arrs).sort();
+    console.log(points)
+
+
     xScaleGraph = d3.time.scale()
                     .domain([new Date(dates[0]),new Date(dates.last())])
                     .range([(graphVis.x+margin.left),(margin.left + graphVis.x+graphVis.w-margin.right)])
@@ -297,18 +386,7 @@ var updateGraph = function(param,type)
     yScaleGraph = d3.scale.linear()
         .domain([(points.min()*0.9),(points.max()*1.1)])
         .range([graphVis.y+graphVis.h-margin.top-300,graphVis.y+margin.top])
-
-
-
-
-    graphCanvas.selectAll("circle")
-        .transition()
-        .attr('cx', function(d){return xScaleGraph(new Date(d.date))})
-        .attr('cy', function(d){return yScaleGraph(d[param][type])})
-        .attr('fill', 'black')
-        .attr('r', 2)
         
-
     xAxisGraph = d3.svg.axis()
       .scale(xScaleGraph)
       .orient("bottom");
@@ -317,35 +395,56 @@ var updateGraph = function(param,type)
       .scale(yScaleGraph)
       .orient("left");
 
-    var dc_point_pairs = points.map(function(d,i) {return [xScaleGraph(new Date(dates[i])),yScaleGraph(d)]})
+    for (key in Object.keys(graphData))
+    {
+        if (typeof graphData[Object.keys(graphData)[key]] == "object")
+        {
+            key = Object.keys(graphData)[key]
+            graphPointPairs[key] = graphPoints[key].map(function(d,i) {return [xScaleGraph(new Date(graphDates[key][i])),yScaleGraph(d)]})
 
-    d3.selectAll('path.dc')
-        .transition()
-        .attr('d','M' + interpolateLinear(dc_point_pairs))
-        .attr('fill','none')
-        .attr('stroke','black')
+            graphCanvas.selectAll('circle.'+key)
+                .transition()
+                .attr({
+                    r: pointRadius,
+                    cx: function(d){return xScaleGraph(new Date(d.date))},
+                    cy: function(d){return yScaleGraph(d[param][type])},
+                    fill: function(d) 
+                    {
+                        if (key =='dc')
+                            return 'red'
+                        else if (key =='bos')
+                            return 'green'
+                        else if (key == 'chi')
+                            return 'blue'
+                    }
+                })
 
+
+            graphCanvas.selectAll('path.'+key)
+                .transition()
+                .attr('d','M' + interpolateLinear(graphPointPairs[key]))
+ 
+
+            console.log(graphPointPairs['dc'])
+
+        }
+    }
 
     d3.selectAll('.xaxis')
         .transition()
         .call(xAxisGraph)
         .attr("transform", "translate(" + 0 + "," + yScaleGraph.range()[0] + ")")
-        
-
-
 
     d3.selectAll('.yaxis')
         .transition()
         .call(yAxisGraph)
         .attr("transform", "translate("+ xScaleGraph.range()[0] +"," + 0 + ")")
-        
-
 
 }
 
-createGraph('rides','Casual');
+createGraph('dist','Casual');
 
-console.log(dc_data)
+//console.log(dc_data)
 
 
 
