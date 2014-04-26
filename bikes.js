@@ -190,6 +190,7 @@ d3.json("/data/washington.json", function(error, data) {
 // chose mercator (good for cities)
 // finding long-lat: http://itouchmap.com/latlong.html
 // zooming map: http://bl.ocks.org/mbostock/4122298
+// http://www.colorcombos.com/
 
 // -----------------------------------
 // graph vis
