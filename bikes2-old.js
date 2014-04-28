@@ -34,40 +34,34 @@ var graphCanvas = d3.select("#graphVis").append("svg").attr({
     height: height + margin.top + margin.bottom
     })
 
-var mapCanvas = d3.select("#mapVis").append("svg").attr({
-    width: map_width + margin.left + margin.right,
-    height: height 
-})
+// var mapCanvas = d3.select("#mapVis").append("svg").attr({
+//     width: map_width + margin.left + margin.right,
+//     height: height 
+// })
 
-var graphsvg = graphCanvas.append("g").attr({
+
+var map = new L.map("mapVis", {center: [-77.05386, 38.954156], zoom: 10})
+    // .addLayer(new L.TileLayer("http://{s}.tile.cloudmade.com/1a1b06b230af4efdbb989ea99e9841af/998/256/{z}/{x}/{y}.png"));
+
+// {minZoom: 7, maxZoom:15}).setView([-77.05386, 38.954156], 10);
+
+new L.tileLayer('http://{s}.tile.cloudmade.com/1a1b06b230af4efdbb989ea99e9841af/998/256/{z}/{x}/{y}.png', {
+    attribution: 'Map data © <a href="http://www.openstreetmap.org">OpenStreetMap contributors</a>'
+}).addTo(map);
+
+var mapCanvas = d3.select(map.getPanes().overlayPane).append("svg");
+
+var graphsvg = graphCanvas.append("g")
+.attr({
         transform: "translate(" + margin.left + "," + margin.top + ")"
     });
 
-var mapsvg = mapCanvas.append("g")
+var mapsvg = mapCanvas.append("g").attr("class", "leaflet-zoom-hide");
+
+// var mapsvg = mapCanvas.append("g")
     // .attr({
     //     transform: "translate(" + margin.left + "," + margin.top + ")"
     // });
-
-// -----------------------------------
-// map vis
-// -----------------------------------
-
-var projection = d3.geo.mercator().scale(1).precision(.1);//.translate([width / 2, height / 2])
-var path = d3.geo.path().projection(projection);
-
-var station_tip = d3.tip()
-  .attr('class', 'd3-tip')
-  .offset([0, 0])
-  .direction('e')
-  .html(function(d) {
-    return d['name'];
-  })
-
-mapsvg.call(station_tip);
-
-var convertToInt = function(s) {
-    return parseInt(s.replace(/,/g, ""), 10);
-};
 
 // method for getting min array element, arr.min()
 if (!Array.prototype.min){
@@ -88,6 +82,28 @@ if (!Array.prototype.last){
     Array.prototype.last = function(){
         return this[this.length - 1];
     };
+};
+
+// -----------------------------------
+// map vis
+// -----------------------------------
+
+var projection = d3.geo.mercator().scale(1).precision(.1);//.translate([width / 2, height / 2])
+var path = d3.geo.path().projection(projection);
+
+
+var station_tip = d3.tip()
+  .attr('class', 'd3-tip')
+  .offset([0, 0])
+  .direction('e')
+  .html(function(d) {
+    return d['name'];
+  })
+
+mapsvg.call(station_tip);
+
+var convertToInt = function(s) {
+    return parseInt(s.replace(/,/g, ""), 10);
 };
 
 function loadStations() {
@@ -165,19 +181,122 @@ function clicked(d) {
 // });
 
 // washington
-d3.json("/data/washington.json", function(error, data) {
+d3.json("/data/washington.geojson", function(collection) {
 
     // console.log(data);
-    projection.scale(80000).center([-77.05386, 38.954156]).translate([mapVis.w/2, mapVis.h/2]);
+    // projection.scale(80000).center([-77.05386, 38.954156]).translate([mapVis.w/2, mapVis.h/2]);
 
-    var cityMap = topojson.feature(data,data.objects.washington).features;
+    // var cityMap = topojson.feature(data,data.objects.washington).features;
     // console.log(cityMap);
 
-    mapsvg.selectAll(".city").data(cityMap).enter().append("path")
-        .attr("class", "city")
-        .attr("d", path).on("click", clicked);
+    // var bounds = d3.geo.bounds(topojson.feature(collection, collection.objects['washington']));
+    // var path = d3.geo.path().projection(projectPoint);
 
-    loadStations();
+    var transform = d3.geo.transform({point: projectPoint}),
+      path = d3.geo.path().projection(transform);
+
+    var feature = mapsvg.selectAll("path")
+       .data(collection.features)
+       .enter().append("path");
+
+    map.on("viewreset", reset);
+      reset();
+
+      // Reposition the SVG to cover the features.
+    function reset() {
+        var bounds = path.bounds(collection),
+            topLeft = bounds[0],
+            bottomRight = bounds[1];
+
+        mapCanvas .attr("width", bottomRight[0] - topLeft[0])
+            .attr("height", bottomRight[1] - topLeft[1])
+            .style("left", topLeft[0] + "px")
+            .style("top", topLeft[1] + "px");
+
+        mapsvg.attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
+
+        feature.attr("d", path);
+      }
+
+    function projectPoint(x, y) {
+        var point = map.latLngToLayerPoint(new L.LatLng(y, x));
+        this.stream.point(point.x, point.y);
+      }
+
+    // var feature = mapsvg.selectAll('.entity')
+    //         .data(topojson.feature(collection, collection.objects['washington']).features)
+    //         .enter()
+    //             .append('path')
+    //             .attr('class', 'entity')
+    //         ;
+    // var label = mapsvg.selectAll('.entity-label')
+    //         .data(topojson.feature(collection, collection.objects['washington']).features)
+    //         .enter()
+    //             .append('text')
+    //             .attr('class', 'entity-label')
+    //         ;
+
+    // map.on('viewreset', reset);
+    // reset();
+
+    // // Reposition the SVG to cover the features.
+    // function reset() {
+    //     var bottomLeft = projectPoint(bounds[0]),
+    //         topRight = projectPoint(bounds[1]);
+
+    //     mapCanvas.attr('width', topRight[0] - bottomLeft[0])
+    //         .attr('height', bottomLeft[1] - topRight[1])
+    //         .style('margin-left', bottomLeft[0] + 'px')
+    //         .style('margin-top', topRight[1] + 'px');
+
+    //     var translation = -bottomLeft[0] + ',' + -topRight[1];
+    //     mapsvg.attr('transform', 'translate(' + -bottomLeft[0] + ',' + -topRight[1] + ')');
+        
+    //     feature.attr('d', path);
+
+    //     label.attr('id', function (d) { return d.id; })
+    //         .attr('class', 'entity-label')
+    //         .attr('transform', function (d) { return 'translate(' + path.centroid(d) + ')'; })
+    //         .attr('x', -20)
+    //         .attr('dy', '.35em')
+    //         .text(function (d) { d.id; })
+    //     ;
+    // }
+
+    // /*
+    //     Preserve keywords (CUB, COBAN, COBAS, CDC) in uppercase.
+    //     @return {string}
+    //  */
+    // function toProperCase(str) {
+    //     var pc =  str.replace(/\w\S*/g, function (s) {
+    //         return s.charAt(0).toUpperCase() + s.substr(1).toLowerCase();
+    //     });
+    //     return pc.replace(/cub|coban|cobas|cdc/i, function (m) {
+    //         return m.toUpperCase();
+    //     });
+    // };
+
+    // // Use Leaflet to implement a D3 geographic projection.
+    // function projectPoint(x) {
+    //     var point = map.latLngToLayerPoint(new L.LatLng(x[1], x[0]));
+    //     return [point.x, point.y];
+    // }
+
+    // var transform = d3.geo.transform({point: projectPoint}),
+    //   path = d3.geo.path().projection(transform);
+
+    //   var feature = g.selectAll("path")
+    //       .data(collection.features)
+    //     .enter().append("path");
+
+    //   map.on("viewreset", reset);
+    //   reset();
+
+    // mapsvg.selectAll(".city").data(cityMap).enter().append("path")
+    //     .attr("class", "city")
+    //     .attr("d", path).on("click", clicked);
+
+    // loadStations();
 
 });
 
@@ -193,6 +312,7 @@ d3.json("/data/washington.json", function(error, data) {
 // http://www.colorcombos.com/
 // leaflet and topo view-source:http://calvinmetcalf.github.io/leaflet.d3/
 // image overlay http://polymaps.org/ex/overlay.html
+// gist example https://gist.github.com/edouard-lopez/10694800
 
 // -----------------------------------
 // graph vis

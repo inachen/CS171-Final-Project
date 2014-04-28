@@ -12,14 +12,15 @@ var view = {
 
 var width = view.w - margin.left - margin.right;
 var height = view.h - margin.bottom - margin.top;
-var map_width = 500;
+var map_width = 600;
+var map_height = 500;
 var centered;
 
 var graphVis = {
     x: 100,
     y: 10,
-    w: width - map_width,
-    h: height
+    w: width - map_width + 20,
+    h: 700
 };
 
 var mapVis = {
@@ -31,43 +32,30 @@ var mapVis = {
 
 var graphCanvas = d3.select("#graphVis").append("svg").attr({
     width: graphVis.w +200+ margin.left + margin.right,
-    height: height + margin.top + margin.bottom
+    height: map_height + margin.top + margin.bottom
     })
 
-var mapCanvas = d3.select("#mapVis").append("svg").attr({
-    width: map_width + margin.left + margin.right,
-    height: height 
-})
+// var mapCanvas = d3.select("#mapVis").append("svg").attr({
+//     width: map_width + margin.left + margin.right,
+//     height: height 
+// })
 
-var graphsvg = graphCanvas.append("g").attr({
+var mapVis = new L.Map("mapVis", {center: [38.934156, -77.05386], zoom: 11, maxZoom: 15, minZoom: 11})
+    .addLayer(new L.TileLayer("http://{s}.tile.cloudmade.com/1a1b06b230af4efdbb989ea99e9841af/998/256/{z}/{x}/{y}.png"));
+
+var mapCanvas = d3.select(mapVis.getPanes().overlayPane).append("svg"),
+    mapsvg = mapCanvas.append("g").attr("class", "leaflet-zoom-hide");
+
+
+var graphsvg = graphCanvas.append("g")
+.attr({
         transform: "translate(" + margin.left + "," + margin.top + ")"
     });
 
-var mapsvg = mapCanvas.append("g")
+// var mapsvg = mapCanvas.append("g")
     // .attr({
     //     transform: "translate(" + margin.left + "," + margin.top + ")"
     // });
-
-// -----------------------------------
-// map vis
-// -----------------------------------
-
-var projection = d3.geo.mercator().scale(1).precision(.1);//.translate([width / 2, height / 2])
-var path = d3.geo.path().projection(projection);
-
-var station_tip = d3.tip()
-  .attr('class', 'd3-tip')
-  .offset([0, 0])
-  .direction('e')
-  .html(function(d) {
-    return d['name'];
-  })
-
-mapsvg.call(station_tip);
-
-var convertToInt = function(s) {
-    return parseInt(s.replace(/,/g, ""), 10);
-};
 
 // method for getting min array element, arr.min()
 if (!Array.prototype.min){
@@ -90,7 +78,76 @@ if (!Array.prototype.last){
     };
 };
 
+var convertToInt = function(s) {
+    return parseInt(s.replace(/,/g, ""), 10);
+};
+
+// -----------------------------------
+// map vis
+// -----------------------------------
+
+// var projection = d3.geo.mercator().scale(1).precision(.1);//.translate([width / 2, height / 2])
+// var path = d3.geo.path().projection(projection);
+
+var transform;
+var path;
+var extent, scale;
+
+var station_tip = d3.tip()
+  .attr('class', 'd3-tip')
+  .offset([0, 0])
+  .direction('e')
+  .html(function(d) {
+    return d['name'];
+  })
+
+mapsvg.call(station_tip);
+
 function loadStations() {
+
+    d3.csv("/data/dc-stations.csv", function(collection) {
+            L.pointsLayer(collection, {
+                radius: 2,
+                applyStyle: circle_style
+            }).addTo(mapVis);
+        });
+
+    function circle_style(circles) {
+            if (!(extent && scale)) {
+                extent = d3.extent(circles.data(), function (d) { return d.properties.depth; });
+                scale = d3.scale.log()
+                        .domain(reverse ? extent.reverse() : extent)
+                        .range(d3.range(classes));
+            }
+            circles.attr('opacity', 0.4)
+                .attr('stroke', scheme[classes - 1])
+                .attr('stroke-width', 1)
+                .attr('fill', function (d) {
+                    return scheme[(scale(d.properties.depth) * 10).toFixed()];
+                });
+
+            circles.on('click', function (d, i) {
+                L.DomEvent.stopPropagation(d3.event);
+
+                var t = '<h3><%- id %></h3>' +
+                        '<ul>' +
+                        '<li>Magnitude: <%- mag %></li>' +
+                        '<li>Depth: <%- depth %>km</li>' +
+                        '</ul>';
+
+                var data = {
+                        id: d.id,
+                        mag: d.properties.magnitude,
+                        depth: d.properties.depth
+                    };
+
+                L.popup()
+                    .setLatLng([d.geometry.coordinates[1], d.geometry.coordinates[0]])
+                    .setContent(_.template(t, data))
+                    .openOn(map);
+
+            });
+        }
     d3.csv("/data/dc-stations.csv",function(error,data){
         mapsvg.selectAll(".station")
             .data(data)
@@ -110,26 +167,42 @@ function loadStations() {
 function clicked(d) {
   var x, y, k;
 
-  if (d && centered !== d) {
-    var centroid = path.centroid(d);
-    x = centroid[0];
-    y = centroid[1];
-    k = 3;
-    centered = d;
-  } else {
-    x = mapVis.w / 2;
-    y = mapVis.h / 2;
-    k = 1;
-    centered = null;
-  }
+  var centroid = path.centroid(d);
+  mapVis.panTo(centroid);
 
-  mapsvg.selectAll("path")
-      .classed("active", centered && function(d) { return d === centered; });
+  console.log(centroid)
 
-  mapsvg.transition()
-      .duration(750)
-      .attr("transform", "translate(" + mapVis.w / 2 + "," + mapVis.h / 2 + ")scale(" + k + ")translate(" + -x + "," + -y + ")")
-      .style("stroke-width", 1/k + "px");
+    // var bounds = path.bounds(collection),
+    //     topLeft = bounds[0],
+    //     bottomRight = bounds[1];
+
+    // mapCanvas .attr("width", bottomRight[0] - topLeft[0])
+    //     .attr("height", bottomRight[1] - topLeft[1])
+    //     .style("left", topLeft[0] + "px")
+    //     .style("top", topLeft[1] + "px");
+
+    // mapsvg   .attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
+
+  // if (d && centered !== d) {
+  //   var centroid = path.centroid(d);
+  //   x = centroid[0];
+  //   y = centroid[1];
+  //   k = 3;
+  //   centered = d;
+  // } else {
+  //   x = mapVis.w / 2;
+  //   y = mapVis.h / 2;
+  //   k = 1;
+  //   centered = null;
+  // }
+
+  // mapsvg.selectAll("path")
+  //     .classed("active", centered && function(d) { return d === centered; });
+
+  // mapsvg.transition()
+  //     .duration(750)
+  //     .attr("transform", "translate(" + mapVis.w / 2 + "," + mapVis.h / 2 + ")scale(" + k + ")translate(" + -x + "," + -y + ")")
+  //     .style("stroke-width", 1/k + "px");
 }
 
 // boston
@@ -165,17 +238,42 @@ function clicked(d) {
 // });
 
 // washington
-d3.json("/data/washington.json", function(error, data) {
+d3.json("/data/washington.geojson", function(collection) {
 
-    // console.log(data);
-    projection.scale(80000).center([-77.05386, 38.954156]).translate([mapVis.w/2, mapVis.h/2]);
+  transform = d3.geo.transform({point: projectPoint});
+      path = d3.geo.path().projection(transform);
 
-    var cityMap = topojson.feature(data,data.objects.washington).features;
-    // console.log(cityMap);
+  var feature = mapsvg.selectAll("path")
+      .data(collection.features)
+    .enter().append("path")
+    .attr("class", "city");
 
-    mapsvg.selectAll(".city").data(cityMap).enter().append("path")
-        .attr("class", "city")
-        .attr("d", path).on("click", clicked);
+  mapVis.on("viewreset", reset);
+  reset();
+
+  // Reposition the SVG to cover the features.
+  function reset() {
+    var bounds = path.bounds(collection),
+        topLeft = bounds[0],
+        bottomRight = bounds[1];
+
+    console.log(bounds)
+
+    mapCanvas .attr("width", bottomRight[0] - topLeft[0])
+        .attr("height", bottomRight[1] - topLeft[1])
+        .style("left", topLeft[0] + "px")
+        .style("top", topLeft[1] + "px");
+
+    mapsvg   .attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
+
+    feature.attr("d", path);//.on("click", clicked);
+  }
+
+  // Use Leaflet to implement a D3 geometric transformation.
+  function projectPoint(x, y) {
+    var point = mapVis.latLngToLayerPoint(new L.LatLng(y, x));
+    this.stream.point(point.x, point.y);
+  }
 
     loadStations();
 
@@ -193,12 +291,16 @@ d3.json("/data/washington.json", function(error, data) {
 // http://www.colorcombos.com/
 // leaflet and topo view-source:http://calvinmetcalf.github.io/leaflet.d3/
 // image overlay http://polymaps.org/ex/overlay.html
+// gist example https://gist.github.com/edouard-lopez/10694800
+// markers on leaflet http://bl.ocks.org/tnightingale/4718717
+// leaflet set up https://github.com/mbostock/bost.ocks.org/blob/gh-pages/mike/leaflet/index.html
+// http://www.colorcombos.com/
 
 // -----------------------------------
 // graph vis
 // -----------------------------------
 
-var pointRadius = 2
+var pointRadius = 1.5;
 
 var xScaleGraph, yScaleGraph;
 
@@ -305,11 +407,11 @@ createGraph = function(param,type) {
                         fill: function(d) 
                         {
                             if (key =='dc')
-                                return 'red'
+                                return '#AA0114'
                             else if (key =='bos')
-                                return 'green'
+                                return '#666666'
                             else if (key == 'chi')
-                                return 'blue'
+                                return '#336699'
                         }
                     })
 
@@ -320,11 +422,11 @@ createGraph = function(param,type) {
                     .attr('stroke',function(d) 
                         {
                             if (key =='dc')
-                                return 'red'
+                                return '#AA0114'
                             else if (key =='bos')
-                                return 'green'
+                                return '#666666'
                             else if (key == 'chi')
-                                return 'blue'
+                                return '#336699'
                         })
             }
         }
@@ -333,7 +435,12 @@ createGraph = function(param,type) {
             .classed("axis",true)
             .classed("xaxis",true)
             .call(xAxisGraph)
-            .attr("transform", "translate(" + 0 + "," + yScaleGraph.range()[0] + ")");
+            .attr("transform", "translate(" + 0 + "," + yScaleGraph.range()[0] + ")")
+            .selectAll('text')
+            .style("text-anchor", "end")
+            .attr("transform", function(d) {
+                return "rotate(-65)" 
+                });;
 
 
         graphCanvas.append("g")
@@ -414,11 +521,11 @@ var updateGraph = function(param,type)
                     fill: function(d) 
                     {
                         if (key =='dc')
-                            return 'red'
+                            return '#AA0114'
                         else if (key =='bos')
-                            return 'green'
+                            return '#666666'
                         else if (key == 'chi')
-                            return 'blue'
+                            return '#336699'
                     }
                 })
 
@@ -437,6 +544,11 @@ var updateGraph = function(param,type)
         .transition()
         .call(xAxisGraph)
         .attr("transform", "translate(" + 0 + "," + yScaleGraph.range()[0] + ")")
+        .selectAll('text')
+            .style("text-anchor", "end")
+            .attr("transform", function(d) {
+                return "rotate(-65)" 
+                });;
 
     d3.selectAll('.yaxis')
         .transition()

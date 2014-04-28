@@ -25,7 +25,9 @@
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="http://d3js.org/topojson.v1.min.js"></script>
 <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
-<!-- <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.6.2/leaflet.css" /> -->
+<script src='https://api.tiles.mapbox.com/mapbox.js/v1.6.2/mapbox.js'></script>
+<link href='https://api.tiles.mapbox.com/mapbox.js/v1.6.2/mapbox.css' rel='stylesheet' />
+<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.6.2/leaflet.css" />
 <style type="text/css">
     @import url("http://github.com/simplegeo/polymaps/raw/v2.4.0/examples/example.css");
 
@@ -39,12 +41,14 @@
     }
 
     .city{
-        fill: lightgrey; /* #9BD7D5; */
-        opacity: 0.7;
+        fill: #000; /* #9BD7D5; */
+        opacity: 0.2;
         stroke: white;
+        stroke-width: 1.5px;
     }
     .city:hover{
-        fill: #FFCC00;
+        fill: #AA0114; /*#FFCC00;*/
+        opacity: 0.5;
     }
 
     text{
@@ -64,10 +68,15 @@
         shape-rendering: crispEdges;
     }
 */
-    #map {
-      width: 960px;
-      height: 500px;
+   #mapVis {
+  width: 600px;
+  height: 500px;
     }
+
+    svg {
+      position: relative;
+    }
+
     
     .station{
         fill:darkgrey;
@@ -123,13 +132,14 @@
 
 
 <table>
-    <tr><td><div id="graphVis"></div></td><td><div id="mapVis"></div></td></tr>
-    <!-- <tr><td><div id="buttons"></div></td></tr>
-    <tr><td><div id="mapVis"></div></td></tr> -->
+    <tr><td><div id="graphVis"></div></td>
+      <td><div id="mapVis" class="mapVis"></div></td></tr>
+    <!-- <tr><td><div id="buttons"></div></td></tr> -->
+    <!-- <tr><td><div id="mapVis"></div></td></tr> -->
 </table>
 
 
-<script src="bikes.js"></script>
+<script src="bikes2.js"></script>
 
 </body>
 </html>
