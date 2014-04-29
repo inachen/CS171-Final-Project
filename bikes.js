@@ -272,7 +272,7 @@ createGraph = function(param,type) {
                         .range([(graphVis.x+margin.left),(margin.left + graphVis.x+graphVis.w-margin.right)])
         
         var yScaleGraph = d3.scale.linear()
-            .domain([(points.min()*0.9),(points.max()*1.1)])
+            .domain([(points.min()*0.95),(points.max())])
             .range([graphVis.y+graphVis.h-margin.top-300,graphVis.y+margin.top])
 
         var xAxisGraph = d3.svg.axis()
@@ -384,7 +384,7 @@ var updateGraph = function(param,type)
                     .range([(graphVis.x+margin.left),(margin.left + graphVis.x+graphVis.w-margin.right)])
         
     yScaleGraph = d3.scale.linear()
-        .domain([(points.min()*0.9),(points.max()*1.1)])
+        .domain([(points.min()*0.95),(points.max())])
         .range([graphVis.y+graphVis.h-margin.top-300,graphVis.y+margin.top])
         
     xAxisGraph = d3.svg.axis()
