@@ -23,6 +23,10 @@ var brushVis = {
     h: 70
 };
 
+var classes = 9, scheme_id = "BuPu",
+    scheme = colorbrewer[scheme_id][classes],
+    container = L.DomUtil.get('mapVis');
+
 var graphVis = {
     x: 100,
     y: (brushVis.h + brushVis.y),
@@ -49,10 +53,12 @@ var graphCanvas = d3.select("#graphVis").append("svg").attr({
 //     height: height 
 // })
 
-var mapVis = new L.Map("mapVis", {center: [38.934156, -77.05386], zoom: 11, maxZoom: 15, minZoom: 11})
+var map = new L.Map(container, {center: [38.934156, -77.05386], zoom: 11, maxZoom: 15, minZoom: 11})
     .addLayer(new L.TileLayer("http://{s}.tile.cloudmade.com/1a1b06b230af4efdbb989ea99e9841af/998/256/{z}/{x}/{y}.png"));
-
-var mapCanvas = d3.select(mapVis.getPanes().overlayPane).append("svg"),
+//     .on('click', function(e) {
+//        mapVis.panTo(L.mouseEventToLatLng(e));
+// });
+var mapCanvas = d3.select(map.getPanes().overlayPane).append("svg"),
     mapsvg = mapCanvas.append("g").attr("class", "leaflet-zoom-hide");
 
 
@@ -100,7 +106,6 @@ var convertToInt = function(s) {
 
 var transform;
 var path;
-var extent, scale;
 
 var station_tip = d3.tip()
   .attr('class', 'd3-tip')
@@ -112,42 +117,34 @@ var station_tip = d3.tip()
 
 mapsvg.call(station_tip);
 
-function loadStations() {
+function circle_style(circles) {
+            // if (!(extent && scale)) {
+            //     extent = d3.extent(circles.data(), function (d) { return d.properties.depth; });
+            //     scale = d3.scale.log()
+            //             .domain(reverse ? extent.reverse() : extent)
+            //             .range(d3.range(classes));
+            // }
 
-    d3.csv("/data/dc-stations.csv", function(collection) {
-            L.pointsLayer(collection, {
-                radius: 2,
-                applyStyle: circle_style
-            }).addTo(mapVis);
-        });
-
-    function circle_style(circles) {
-            if (!(extent && scale)) {
-                extent = d3.extent(circles.data(), function (d) { return d.properties.depth; });
-                scale = d3.scale.log()
-                        .domain(reverse ? extent.reverse() : extent)
-                        .range(d3.range(classes));
-            }
             circles.attr('opacity', 0.4)
                 .attr('stroke', scheme[classes - 1])
                 .attr('stroke-width', 1)
-                .attr('fill', function (d) {
-                    return scheme[(scale(d.properties.depth) * 10).toFixed()];
-                });
+                .attr('fill', scheme[1]);
+
+                //     function (d) {
+                //     return scheme[(scale(d.properties.depth) * 10).toFixed()];
+                // });
 
             circles.on('click', function (d, i) {
                 L.DomEvent.stopPropagation(d3.event);
 
                 var t = '<h3><%- id %></h3>' +
                         '<ul>' +
-                        '<li>Magnitude: <%- mag %></li>' +
-                        '<li>Depth: <%- depth %>km</li>' +
+                        '<li>Name: <%- name %></li>' +
                         '</ul>';
 
                 var data = {
                         id: d.id,
-                        mag: d.properties.magnitude,
-                        depth: d.properties.depth
+                        name: d.properties.name,
                     };
 
                 L.popup()
@@ -157,29 +154,87 @@ function loadStations() {
 
             });
         }
-    d3.csv("/data/dc-stations.csv",function(error,data){
-        mapsvg.selectAll(".station")
-            .data(data)
-        .enter().append("circle")
-        .filter(function(d) { return (projection([+d["long"], +d["lat"]]) != null ) })  
-          .attr("class", "station hasData")
-          .attr("cx", function(d) { coords = projection([+d["long"], +d["lat"]]);
-                if (coords != null){return coords[0] }})
-         .attr("cy", function(d) { coords = projection([+d["long"], +d["lat"]]); 
-                if (coords != null){return coords[1] }})
-         .attr("r", 2)
-        .on('mouseover', station_tip.show)
-        .on('mouseout', station_tip.hide)
+
+
+function loadStations() {
+
+    // d3.csv("/data/dc-stations.csv", function(collection) {
+    //         L.pointsLayer(collection, {
+    //             radius: 2,
+    //             applyStyle: circle_style
+    //         }).addTo(mapVis);
+    //     });
+
+    d3.json("/data/dc-stations.json", function(collection) {
+        console.log("hi");
+        console.log(collection);
+        L.pointsLayer(collection, {
+            radius: 4,
+            applyStyle: circle_style
+        }).addTo(map);
+
     });
+
+            // var chart = timeseries_chart(scheme)
+            //         .x(get_time).xLabel("Earthquake origin time")
+            //         .y(get_magnitude).yLabel("Magnitude")
+            //         .brushmove(on_brush);
+
+            // d3.select("body").datum(collection.features).call(chart);
+        // });
+
+        
+    // d3.csv("/data/dc-stations.csv",function(error,data){
+    //     stations = mapsvg.selectAll(".station")
+    //         .data(data)
+    //     .enter().append("circle")
+    //     .filter(function(d) { return (map.latLngToLayerPoint(new L.LatLng(+d["lat"], +d["long"])) != null ) })  
+    //       .attr("class", "station hasData")
+    //       .attr("cx", function(d) { coords = map.latLngToLayerPoint(new L.LatLng(+d["lat"], +d["long"]));
+    //             console.log(coords);
+    //             if (coords != null){return coords.x }})
+    //      .attr("cy", function(d) { coords = map.latLngToLayerPoint(new L.LatLng(+d["lat"], +d["long"]));
+    //             if (coords != null){return coords.y }})
+    //      .attr("r", 5)
+    //      .attr("fill",  scheme[5])
+    //      .attr('stroke', scheme[classes - 1])
+    //      .attr('stroke-width', 1)
+    //     .on('mouseover', station_tip.show)
+    //     .on('mouseout', station_tip.hide);
+
+          // map.on("viewreset", reset);
+          // reset();
+
+          // Reposition the SVG to cover the features.
+       //    function reset() {
+
+       //      var bounds = path.bounds(stations),
+       //          topLeft = bounds[0],
+       //          bottomRight = bounds[1];
+
+       //      // console.log(bounds)
+
+       //      mapCanvas .attr("width", bottomRight[0] - topLeft[0])
+       //          .attr("height", bottomRight[1] - topLeft[1])
+       //          .style("left", topLeft[0] + "px")
+       //          .style("top", topLeft[1] + "px");
+
+       //      mapsvg   .attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
+
+       //  stations.attr("cx", function (d) { return map.latLngToLayerPoint(new L.LatLng(+d["lat"], +d["long"])).x; })
+       // .attr("cy", function (d) { return map.latLngToLayerPoint(new L.LatLng(+d["lat"], +d["long"])).y; });
+   // }
+    // });
 }
 
 function clicked(d) {
   var x, y, k;
 
   var centroid = path.centroid(d);
-  mapVis.panTo(centroid);
+  map.panTo(new L.LatLng(centroid));
+  // mapVis.panTo(centroid);
 
-  console.log(centroid)
+  // console.log(centroid)
 
     // var bounds = path.bounds(collection),
     //     topLeft = bounds[0],
@@ -257,7 +312,7 @@ d3.json("/data/washington.geojson", function(collection) {
     .enter().append("path")
     .attr("class", "city");
 
-  mapVis.on("viewreset", reset);
+  map.on("viewreset", reset);
   reset();
 
   // Reposition the SVG to cover the features.
@@ -266,7 +321,7 @@ d3.json("/data/washington.geojson", function(collection) {
         topLeft = bounds[0],
         bottomRight = bounds[1];
 
-    console.log(bounds)
+    // console.log(bounds)
 
     mapCanvas .attr("width", bottomRight[0] - topLeft[0])
         .attr("height", bottomRight[1] - topLeft[1])
@@ -275,12 +330,13 @@ d3.json("/data/washington.geojson", function(collection) {
 
     mapsvg   .attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
 
+
     feature.attr("d", path);//.on("click", clicked);
   }
 
   // Use Leaflet to implement a D3 geometric transformation.
   function projectPoint(x, y) {
-    var point = mapVis.latLngToLayerPoint(new L.LatLng(y, x));
+    var point = map.latLngToLayerPoint(new L.LatLng(y, x));
     this.stream.point(point.x, point.y);
   }
 
@@ -301,7 +357,7 @@ d3.json("/data/washington.geojson", function(collection) {
 // leaflet and topo view-source:http://calvinmetcalf.github.io/leaflet.d3/
 // image overlay http://polymaps.org/ex/overlay.html
 // gist example https://gist.github.com/edouard-lopez/10694800
-// markers on leaflet http://bl.ocks.org/tnightingale/4718717
+// ***markers on leaflet http://bl.ocks.org/tnightingale/4718717
 // leaflet set up https://github.com/mbostock/bost.ocks.org/blob/gh-pages/mike/leaflet/index.html
 // http://www.colorcombos.com/
 
@@ -314,8 +370,6 @@ var pointRadius = 1.5;
 var xScaleGraph, yScaleGraph;
 
 var graphData = {};
-
-
 
 
 var graphType = 'Casual'
@@ -346,8 +400,6 @@ createGraph = function(param,type) {
         graphData['bos'] = data['bos'];
 
 
-         
-        //console.log(new Date("2013-06-27").setTime(new Date("2013-06-27").getTime() +  (1 * 24 * 60 * 60 * 1000)).toString())
 
         for (key in Object.keys(graphData))
         {
@@ -385,6 +437,7 @@ createGraph = function(param,type) {
         })
 
         var dates = [];
+
         dates = dates.concat.apply(dates, dates_arrs)
         dates = dates.sort(function(date1,date2)
             {
@@ -395,11 +448,16 @@ createGraph = function(param,type) {
 
         console.log(dates)
 
+
         var points_arrs = Object.keys(graphPoints).map(function (key) {
             return graphPoints[key]
         })
+
+
+        // console.log(points_arrs)
         var points = [];
         points = points.concat.apply(points, points_arrs).sort();
+        // console.log(points)
 
         xScaleGraph = d3.time.scale()
                         .domain([dates[0],dates.last()])
@@ -550,8 +608,12 @@ var updateGraph = function(param,type)
     var points_arrs = Object.keys(graphPoints).map(function (key) {
             return graphPoints[key]
         })
+
+    // console.log(points_arrs)
     var points = [];
     points = points.concat.apply(points, points_arrs).sort();
+    // console.log(points)
+
 
 /*
     xScaleGraph = d3.time.scale()
@@ -609,7 +671,6 @@ var updateGraph = function(param,type)
                 .attr('d','M' + interpolateLinear(graphPointPairs[key]))
  
 
-
         }
     }
 
@@ -639,21 +700,6 @@ function brushed() {
     //console.log(brush.empty() ? xScaleGraph.domain() : brush.extent())
     xScaleGraph.domain(brush.empty() ? xScaleGraph.domain() : brush.extent());
     updateGraph(graphStat,graphType)
-
-
-
-/* 
-  // d3.event.stopPropagation();
-  xScaleGraph.domain(brush.empty() ? xScaleGraph.domain() : brush.extent());
-  detail.select(".detailArea").attr("d", area_detail);
-  detail.select(".detailPath").attr("d", path_detail);
-  detail.selectAll(".detailDot").attr("cx",function(d){ return xScale(d.date);}).attr("cy", function(d){ return yScale(d.womens);});
-  detail.select(".x.axis").call(xAxis);
-  */
-}
-
-
-
 
 d3.select("input[value=\"dist\"]").on("click", function(){updateGraph('dist',graphType);});
 d3.select("input[value=\"speed\"]").on("click", function(){updateGraph('speed',graphType);});

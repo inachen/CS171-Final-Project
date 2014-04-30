@@ -25,6 +25,7 @@
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="http://d3js.org/topojson.v1.min.js"></script>
 <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/lodash.js/1.0.0-rc.3/lodash.underscore.min.js"></script>
 <!-- <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.6.2/leaflet.css" /> -->
 <style type="text/css">
     @import url("http://github.com/simplegeo/polymaps/raw/v2.4.0/examples/example.css");
@@ -68,13 +69,13 @@
       width: 960px;
       height: 500px;
     }
-    
+
     .station{
         fill:darkgrey;
         opacity: .7;
     }
     .station.hasData{
-        fill:#FF7260;
+        /*fill:#FF7260;*/
         opacity: 1;
     }
     .station.hasData:hover{
