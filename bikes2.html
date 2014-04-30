@@ -28,6 +28,9 @@
 <script src='https://api.tiles.mapbox.com/mapbox.js/v1.6.2/mapbox.js'></script>
 <link href='https://api.tiles.mapbox.com/mapbox.js/v1.6.2/mapbox.css' rel='stylesheet' />
 <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.6.2/leaflet.css" />
+<script type="text/javascript" src="js/colorbrewer.js"></script>
+<script type="text/javascript" src="js/leaflet.points-layer.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/lodash.js/1.0.0-rc.3/lodash.underscore.min.js"></script>
 <style type="text/css">
     @import url("http://github.com/simplegeo/polymaps/raw/v2.4.0/examples/example.css");
 
@@ -77,6 +80,8 @@
       position: relative;
     }
 
+    .leaflet-popup-content ul { padding-left: 1.5em; }
+
     
     .station{
         fill:darkgrey;
@@ -88,6 +93,7 @@
     }
     .station.hasData:hover{
         fill:#FFCC00;
+        cursor: crosshair;
     }
     .hourLine{
         fill:none;
