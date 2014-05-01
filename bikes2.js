@@ -550,6 +550,9 @@ createGraph = function(param,type) {
 
     jQuery.ajax({url:"./combo_stats.json",async:false,success:function(data)
     {
+
+
+
         var graphPoints= {}
         var graphPointPairs = {}
         var brushPointPairs = {}
@@ -615,7 +618,6 @@ createGraph = function(param,type) {
         var dates_arrs = Object.keys(graphDates).map(function (key) {
             return graphDates[key]
         })
-        console.log(graphDates)
 
         var dates = [];
 
@@ -782,6 +784,28 @@ createGraph = function(param,type) {
           .attr("y", -6)
           .attr("height", brushVis.h + 10);
 
+          console.log(xScaleGraph.range()[1], graphCanvas)
+
+        var LEGENNNND = graphCanvas.append('foreignObject')
+            .classed('legendBox',true)
+            .attr('x',xScaleGraph.range()[1]-70)
+            .attr('y',yScaleGraph.range()[1]+10)
+            .attr('width', 120)
+            .attr('height', 100)
+            .style('font','Courier New')
+            .append("xhtml:body")
+            .html('<div style="border-radius: 10px 10px 10px 10px;text-align:center;background-color: #AA0114;color:#FFFFFF;" class="legend" width="60">Washington D.C.</div>   <hr style=" border-radius: 10px 10px 10px 10px;margin:0px; height:2px; visibility:hidden;" />  <div class="legend" style="border-radius: 10px 10px 10px 10px;text-align:center; background-color: #669966;color:#FFFFFF;" width="60">Boston</div>  <hr style="margin:0px; height:2px; visibility:hidden;" />  <div style=" border-radius: 10px 10px 10px 10px;text-align:center; background-color: #336699;color:#FFFFFF;" class="legend" width="60">Chicago</div>')
+            .style('font','Arial')
+
+                            if (key =='dc')
+                                return '#AA0114'
+                            else if (key =='bos')
+                                return '#669966'
+                            else if (key == 'chi')
+                                return '#336699'
+
+          console.log(xScaleGraph.range()[1],LEGENNNND)
+
     }})
 }
 
@@ -942,14 +966,14 @@ function brushed() {
     xScaleGraph.domain(brush.empty() ? xScaleBrush.domain() : brush.extent());
     updateGraph(graphStat,graphType)}
 
-d3.select("input[value=\"dist\"]").on("click", function(){updateGraph('dist',graphType); updateMap('distance', mapRider);});
-d3.select("input[value=\"speed\"]").on("click", function(){updateGraph('speed',graphType);updateMap('avg_speed', mapRider);});
-d3.select("input[value=\"rides\"]").on("click", function(){updateGraph('rides',graphType); updateMap('rides', mapRider);});
-d3.select("input[value=\"time\"]").on("click", function(){updateGraph('time',graphType); updateMap('duration', mapRider);});
+d3.select("label[for=\"metric1\"]").on("click", function(){updateGraph('dist',graphType); updateMap('distance', mapRider);});
+d3.select("label[for=\"metric2\"]").on("click", function(){updateGraph('speed',graphType);updateMap('avg_speed', mapRider);});
+d3.select("label[for=\"metric3\"]").on("click", function(){updateGraph('rides',graphType); updateMap('rides', mapRider);});
+d3.select("label[for=\"metric4\"]").on("click", function(){updateGraph('time',graphType); updateMap('duration', mapRider);});
 
 
-d3.select("input[value=\"Subscriber\"]").on("click", function(){updateGraph(graphStat,'Subscriber'); updateMap(mapMetric, "Subscriber");});
-d3.select("input[value=\"Casual\"]").on("click", function(){updateGraph(graphStat,'Casual'); updateMap(mapMetric, "Casual");});
+d3.select("label[for=\"rider2\"]").on("click", function(){updateGraph(graphStat,'Subscriber'); updateMap(mapMetric, "Subscriber");});
+d3.select("label[for=\"rider1\"]").on("click", function(){updateGraph(graphStat,'Casual'); updateMap(mapMetric, "Casual");});
 
 d3.select("input[value=\"boston\"]").on("click", function(){changeMap('boston');});
 d3.select("input[value=\"chicago\"]").on("click", function(){changeMap('chicago');});
