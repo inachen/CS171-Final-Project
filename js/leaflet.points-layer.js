@@ -35,7 +35,11 @@ L.PointsLayer = L.Class.extend({
     },
 
     onRemove: function (map) {
-        this._container.parentNode.removeChild(this._container);
+
+        this._container.remove();
+
+        // console.log(this._container.remove());
+        // this._container.parentNode.removeChild(this._container);
 
         map.off({
             'moveend': this._update
@@ -54,14 +58,16 @@ L.PointsLayer = L.Class.extend({
         var overlayPane = this._map.getPanes().overlayPane;
         if (!this._container || overlayPane.empty) {
             this._container = d3.select(overlayPane)
-                .append('svg').attr('class', 'leaflet-layer leaflet-zoom-hide');
+                .append('svg').attr('class', 'leaflet-layer leaflet-zoom-hide')
+                .attr('pointer-events','none');
 
             this._layer = this._container.append("g");
 
             var circles = this._layer.selectAll(".circle")
                 .data(this._data.features).enter()
                 .append("path")
-                .attr("class", "circle");
+                .attr("class", "circle")
+                .attr('pointer-events','auto');
 
             this._applyStyle(circles);
         }
@@ -90,12 +96,24 @@ L.PointsLayer = L.Class.extend({
 
         var curr_r = this.options.radius;
 
-        this.options.radius = curr_r * zoom / this.options.zoom;
+        this.options.radius = function (d){ 
+                if (weekdata[d["id"].toString()] != null) 
+                    {return radius_scale(weekdata[d["id"].toString()][this.options.subkey][this.options.typekey]['avg']* zoom / this.options.zoom);} 
+                else 
+                    {return 1 * zoom / this.options.zoom;}} 
+
+        // console.log(this._layer.selectAll(".cicle").attr('r'));
+
+        // console.log(this.options.radius);
+
+        // this.options.radius = curr_r * zoom / this.options.zoom;
 
         this.options.zoom = zoom;
 
-        console.log(zoom);
-        console.log(this.options.radius);
+        // console.log(this.options.subkey);
+
+        // console.log(zoom);
+        // console.log(this.options.radius);
     },
 
     _applyStyle: function (circles) {
@@ -128,6 +146,6 @@ L.PointsLayer = L.Class.extend({
 
 });
 
-L.pointsLayer = function (data, options) {
-    return new L.PointsLayer(data, options);
-};
+// L.pointsLayer = function (data, options) {
+//     return new L.PointsLayer(data, options);
+// };

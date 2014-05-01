@@ -8,16 +8,22 @@
 <body>
 
   <form>
-  Layout:
+  Metric:
     <label><input type="radio" name="param" value="dist" checked> Distance</label>
     <label><input type="radio" name="param" value="speed" > Speed</label>
     <label><input type="radio" name="param" value="rides"> Rides/Day</label>  
     <label><input type="radio" name="param" value="time" > AverageRide Duration</label>
   </form>
   <form>
-  Color:
+  Rider:
     <label><input type="radio" name="type" value="Casual" checked> Casual</label>
     <label><input type="radio" name="type" value="Subscriber" > Subscriber</label>
+  </form>
+  <form>
+  Map:
+    <label><input type="radio" name="type" value="boston" checked> Boston</label>
+    <label><input type="radio" name="type" value="chicago" > Chicago</label>
+    <label><input type="radio" name="type" value="dc" > DC</label>
   </form>
   
 <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
@@ -80,23 +86,35 @@
       position: relative;
     }
 
-    .leaflet-popup-content ul { padding-left: 1.5em; }
+    .leaflet-popup-content ul { 
+      padding-left: 0em; 
+      list-style-type: none;
+
+    }
+
+    .leaflet-popup-content {
+      padding: 0px;
+    }
 
     
-    .station{
+ /*   .station{
         fill:darkgrey;
         opacity: .7;
+    }*/
+
+    /* cirle for stations */
+    .circle{
+        /*fill:#FF7260;*/
+        opacity: 0.5;
     }
-    .station.hasData{
-        fill:#FF7260;
-        opacity: 1;
-    }
-    .station.hasData:hover{
+    .circle:hover{
         fill:#FFCC00;
-        cursor: crosshair;
+        opacity: 1;
+        cursor: default;
     }
     .hourLine{
         fill:none;
+        stroke-width: 1px;
         stroke:steelblue;
 
     }
@@ -105,6 +123,18 @@
         fill: #404040 ;
 
     }
+
+/*    .chi path {
+      width: 1.5px ;
+    }
+
+    .bos path {
+      width: 1.5px ;
+    }
+
+    .dc path {
+      width: 1.5px ;
+    }*/
 
     .axis path,
     .axis line {
@@ -127,6 +157,24 @@
 
     .d3-tip text {
       fill: #fff;
+      font-size: 12px;
+      stroke: none;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    .d3-neigh-tip {
+      line-height: 1.5;
+      padding: 6px;
+      background: rgba(255, 255, 255, 0.8);
+      color: #000;
+      /*opacity: 0.8;*/
+      border-radius: 2px;
+      position: absolute; 
+    }
+
+    .d3-neigh-tip text {
+      fill: #000;
+      /*opacity: 0.8;*/
       font-size: 12px;
       stroke: none;
       font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;

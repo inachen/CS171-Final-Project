@@ -16,9 +16,7 @@ var map_width = 600;
 var map_height = 500;
 var centered;
 
-var classes = 9, scheme_id = "BuPu",
-    scheme = colorbrewer[scheme_id][classes],
-    container = L.DomUtil.get('mapVis');
+var container = L.DomUtil.get('mapVis');
 
 var graphVis = {
     x: 100,
@@ -44,7 +42,7 @@ var graphCanvas = d3.select("#graphVis").append("svg").attr({
 //     height: height 
 // })
 
-var map = new L.Map(container, {center: [38.934156, -77.05386], zoom: 11, maxZoom: 15, minZoom: 11})
+var map = new L.Map(container, {center: [38.934156, -77.05386], zoom: 10, maxZoom: 15, minZoom: 9})
     .addLayer(new L.TileLayer("http://{s}.tile.cloudmade.com/1a1b06b230af4efdbb989ea99e9841af/998/256/{z}/{x}/{y}.png"));
 //     .on('click', function(e) {
 //        mapVis.panTo(L.mouseEventToLatLng(e));
@@ -95,8 +93,21 @@ var convertToInt = function(s) {
 // var projection = d3.geo.mercator().scale(1).precision(.1);//.translate([width / 2, height / 2])
 // var path = d3.geo.path().projection(projection);
 
+
+// initial display preferences
+var mapRider = "Casual";
+var mapMetric = "distance";
+var mapCity = "boston";
+
+var classes = 9, scheme_id = "BuPu",
+    scheme = colorbrewer[scheme_id][classes];
+
+var stations_layer;
+
 var transform;
 var path;
+
+var radius_scale;
 
 var station_tip = d3.tip()
   .attr('class', 'd3-tip')
@@ -106,7 +117,17 @@ var station_tip = d3.tip()
     return d['name'];
   })
 
+var neigh_tip = d3.tip()
+  .attr('class', 'd3-neigh-tip')
+  .html(function(d) {
+    // console.log(d);
+    return d['properties']['name'];
+  })
+  .offset([0, 10])
+  .direction('e');
+
 mapsvg.call(station_tip);
+mapsvg.call(neigh_tip);
 
 function circle_style(circles) {
             // if (!(extent && scale)) {
@@ -119,7 +140,15 @@ function circle_style(circles) {
             circles.attr('opacity', 0.4)
                 .attr('stroke', scheme[classes - 1])
                 .attr('stroke-width', 1)
-                .attr('fill', scheme[1]);
+                .attr('fill', scheme[4])
+                // function (d) {
+                //     if (weekdata[d["id"].toString()]!= null) 
+                //         {return scheme[4];}
+                //     else
+                //         {
+                //             return 'lightgrey';
+                //         }});
+                // // .attr('class', 'station');
 
                 //     function (d) {
                 //     return scheme[(scale(d.properties.depth) * 10).toFixed()];
@@ -128,9 +157,9 @@ function circle_style(circles) {
             circles.on('click', function (d, i) {
                 L.DomEvent.stopPropagation(d3.event);
 
-                var t = '<h3><%- id %></h3>' +
+                var t = '<h3><%- name %></h3>' +
                         '<ul>' +
-                        '<li>Name: <%- name %></li>' +
+                        '<li>id: <%- id %></li>' +
                         '</ul>';
 
                 var data = {
@@ -146,8 +175,39 @@ function circle_style(circles) {
             });
         }
 
+function updateMap(typekey, subkey) {
 
-function loadStations() {
+    // console.log(map);
+
+    map.removeLayer(stations_layer);
+
+    loadStats(subkey, typekey);
+
+    mapRider = subkey;
+    mapMetric = typekey;
+
+    // console.log(map);
+
+    // loadStats(subkey, typekey);
+
+    // // console.log(stations_layer.options.radius);
+    // stations_layer.options.radius = function(d){
+    // // console.log(d["id"]);
+    // // console.log(weekdata[d["id"].toString()][subkey]); 
+    //             if (weekdata[d["id"].toString()] != null) 
+    //                 {return radius_scale(weekdata[d["id"].toString()][subkey][typekey]['avg']);} 
+    //             else 
+    //                 {return 1;}}
+
+    // // console.log(stations_layer.options.radius);
+
+
+
+
+}
+
+
+function loadStations(subkey, typekey) {
 
     // d3.csv("/data/dc-stations.csv", function(collection) {
     //         L.pointsLayer(collection, {
@@ -157,11 +217,17 @@ function loadStations() {
     //     });
 
     d3.json("/data/dc-stations.json", function(collection) {
-        console.log("hi");
-        console.log(collection);
-        L.pointsLayer(collection, {
-            radius: 4,
-            applyStyle: circle_style
+        // console.log("hi");
+        // console.log(collection);
+        stations_layer = new L.PointsLayer(collection, {
+            radius: function(d){ 
+                if (weekdata[d["id"].toString()] != null && weekdata[d["id"].toString()][subkey][typekey]['avg'] != 0 ) 
+                    {return radius_scale(weekdata[d["id"].toString()][subkey][typekey]['avg']);} 
+                else 
+                    {return 1;}},
+            applyStyle: circle_style,
+            subkey: subkey,
+            typekey: typekey
         }).addTo(map);
 
     });
@@ -216,6 +282,33 @@ function loadStations() {
        // .attr("cy", function (d) { return map.latLngToLayerPoint(new L.LatLng(+d["lat"], +d["long"])).y; });
    // }
     // });
+}
+
+function loadStats(subkey, typekey){
+ d3.json("/data/dc_map_weekday_stats.json", function(error,data){
+        weekdata = data;
+
+        var max = Math.max.apply(null,
+                        Object.keys(data).map(function(e) {
+                                return data[e][subkey][typekey]["avg"];
+                        }).filter(function (value) {
+        return (value != 0);
+    }));
+        var min = Math.min.apply(null,
+                        Object.keys(data).map(function(e) {
+                                return data[e][subkey][typekey]["avg"];
+                        }).filter(function (value) {
+        return (value != 0);
+    }));
+
+        radius_scale = d3.scale.linear().domain([min, max]).range([3, 10]);
+
+        // console.log(radius_scale);
+
+        // console.log(radius_scale(1));
+        
+        loadStations(subkey, typekey);
+    })
 }
 
 function clicked(d) {
@@ -301,7 +394,9 @@ d3.json("/data/washington.geojson", function(collection) {
   var feature = mapsvg.selectAll("path")
       .data(collection.features)
     .enter().append("path")
-    .attr("class", "city");
+    .attr("class", "city")
+    .on('mouseover', neigh_tip.show)
+    .on('mouseout', neigh_tip.hide);
 
   map.on("viewreset", reset);
   reset();
@@ -319,7 +414,7 @@ d3.json("/data/washington.geojson", function(collection) {
         .style("left", topLeft[0] + "px")
         .style("top", topLeft[1] + "px");
 
-    mapsvg   .attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
+    mapsvg.attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
 
 
     feature.attr("d", path);//.on("click", clicked);
@@ -331,7 +426,7 @@ d3.json("/data/washington.geojson", function(collection) {
     this.stream.point(point.x, point.y);
   }
 
-    loadStations();
+    loadStats(mapRider, mapMetric);
 
 });
 
@@ -400,7 +495,7 @@ createGraph = function(param,type) {
             if (typeof graphData[Object.keys(graphData)[key]] == "object")
             {
                 key = Object.keys(graphData)[key]
-                console.log(key)
+                // console.log(key)
                 graphDates[key] = Object.keys(graphData[key]).sort()
                 graphObjs[key] = graphDates[key].map(function(d) {return graphData[key][d]})
                 graphPoints[key] = graphObjs[key].map(function(d) {return d[param][type]})
@@ -617,14 +712,14 @@ createGraph('dist','Casual');
 
 
 
-d3.select("input[value=\"dist\"]").on("click", function(){updateGraph('dist',graphType);});
-d3.select("input[value=\"speed\"]").on("click", function(){updateGraph('speed',graphType);});
-d3.select("input[value=\"rides\"]").on("click", function(){updateGraph('rides',graphType)});
-d3.select("input[value=\"time\"]").on("click", function(){updateGraph('time',graphType)});
+d3.select("input[value=\"dist\"]").on("click", function(){updateGraph('dist',graphType); updateMap('distance', mapRider);});
+d3.select("input[value=\"speed\"]").on("click", function(){updateGraph('speed',graphType);updateMap('avg_speed', mapRider);});
+d3.select("input[value=\"rides\"]").on("click", function(){updateGraph('rides',graphType); updateMap('rides', mapRider);});
+d3.select("input[value=\"time\"]").on("click", function(){updateGraph('time',graphType); updateMap('duration', mapRider);});
 
 
-d3.select("input[value=\"Subscriber\"]").on("click", function(){updateGraph(graphStat,'Subscriber')});
-d3.select("input[value=\"Casual\"]").on("click", function(){updateGraph(graphStat,'Casual')});
+d3.select("input[value=\"Subscriber\"]").on("click", function(){updateGraph(graphStat,'Subscriber'); updateMap(mapMetric, "Subscriber");});
+d3.select("input[value=\"Casual\"]").on("click", function(){updateGraph(graphStat,'Casual'); updateMap(mapMetric, "Casual");});
 
 
 
