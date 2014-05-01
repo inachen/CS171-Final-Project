@@ -616,7 +616,7 @@ createGraph = function(param,type) {
                             if (key =='dc')
                                 return '#AA0114'
                             else if (key =='bos')
-                                return '#666666'
+                                return '#669966'
                             else if (key == 'chi')
                                 return '#336699'
                         }
@@ -633,7 +633,7 @@ createGraph = function(param,type) {
                             if (key =='dc')
                                 return '#AA0114'
                             else if (key =='bos')
-                                return '#666666'
+                                return '#669966'
                             else if (key == 'chi')
                                 return '#336699'
                         })
@@ -775,7 +775,7 @@ var updateGraph = function(param,type)
                         if (key =='dc')
                             return '#AA0114'
                         else if (key =='bos')
-                            return '#666666'
+                            return '#669966'
                         else if (key == 'chi')
                             return '#336699'
                     }
