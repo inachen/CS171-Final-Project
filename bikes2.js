@@ -16,15 +16,18 @@ var map_width = 600;
 var map_height = 500;
 var centered;
 
-
 var container = L.DomUtil.get('mapVis');
 
 var brushVis = {
     x: 100,
-    y: 2*margin.top,
+    y: 10*margin.top,
     w: width - map_width + 20,
     h: 70
 };
+
+// var classes = 9, scheme_id = "BuPu",
+//     scheme = colorbrewer[scheme_id][classes],
+//     container = L.DomUtil.get('mapVis');
 
 var graphVis = {
     x: 100,
@@ -503,10 +506,10 @@ createGraph = function(param,type) {
             {
                 key = Object.keys(graphData)[key]
 
-                // console.log(key)
-                // graphDates[key] = Object.keys(graphData[key]).sort()
-                // graphObjs[key] = graphDates[key].map(function(d) {return graphData[key][d]})
-                // graphPoints[key] = graphObjs[key].map(function(d) {return d[param][type]})
+//                 // console.log(key)
+//                 graphDates[key] = Object.keys(graphData[key]).sort()
+//                 graphObjs[key] = graphDates[key].map(function(d) {return graphData[key][d]})
+//                 graphPoints[key] = graphObjs[key].map(function(d) {return d[param][type]})
 
                 //console.log(key)
                 if (key == 'bos' || key == 'chi')
@@ -528,6 +531,7 @@ createGraph = function(param,type) {
                 }
                 graphObjs[key] = Object.keys(graphData[key]).sort().map(function(d) { return d; }).map(function(d) {return graphData[key][d]})
                 graphPoints[key] = graphObjs[key].map(function(d) {return d[param][type]})  
+
 
             }  
 
@@ -801,7 +805,7 @@ createGraph('dist','Casual');
 function brushed() {
     //console.log(brush.empty() ? xScaleGraph.domain() : brush.extent())
     xScaleGraph.domain(brush.empty() ? xScaleGraph.domain() : brush.extent());
-    updateGraph(graphStat,graphType)
+    updateGraph(graphStat,graphType)}
 
 d3.select("input[value=\"dist\"]").on("click", function(){updateGraph('dist',graphType); updateMap('distance', mapRider);});
 d3.select("input[value=\"speed\"]").on("click", function(){updateGraph('speed',graphType);updateMap('avg_speed', mapRider);});
