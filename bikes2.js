@@ -16,14 +16,23 @@ var map_width = 600;
 var map_height = 500;
 var centered;
 
+
 var container = L.DomUtil.get('mapVis');
+
+var brushVis = {
+    x: 100,
+    y: 2*margin.top,
+    w: width - map_width + 20,
+    h: 70
+};
 
 var graphVis = {
     x: 100,
-    y: 10,
+    y: (brushVis.h + brushVis.y),
     w: width - map_width + 20,
-    h: 700
+    h: 750
 };
+
 
 var mapVis = {
     x: 10,
@@ -34,8 +43,9 @@ var mapVis = {
 
 var graphCanvas = d3.select("#graphVis").append("svg").attr({
     width: graphVis.w +200+ margin.left + margin.right,
-    height: map_height + margin.top + margin.bottom
-    })
+    height: ((map_height + margin.top + margin.bottom) > (graphVis.y + graphVis.h - brushVis.y + margin.top + margin.bottom)) ? (map_height + margin.top + margin.bottom) : (graphVis.y + graphVis.h - brushVis.y + margin.top + margin.bottom)
+    //height: map_height + margin.top + margin.bottom
+});
 
 // var mapCanvas = d3.select("#mapVis").append("svg").attr({
 //     width: map_width + margin.left + margin.right,
@@ -469,7 +479,7 @@ interpolateLinear = function(point_arr) {
 var graphObjs = {};
 var graphDates = {};
 
-var dc_dates,dc_objs,dc_points,chi_dates,chi_objs,chi_points,bos_dates,bos_objs,bos_points,dates,points,xScaleGraph,yScaleGraph;
+var dc_dates,dc_objs,dc_points,chi_dates,chi_objs,chi_points,bos_dates,bos_objs,bos_points,dates,points,xScaleGraph,yScaleGraph,xScaleBrush,brush, area_detail, path_detail;
 
 createGraph = function(param,type) {
 
@@ -486,46 +496,84 @@ createGraph = function(param,type) {
         graphData['bos'] = data['bos'];
 
 
-        // console.log(data,Object.keys(graphData));
-
-
 
         for (key in Object.keys(graphData))
         {
             if (typeof graphData[Object.keys(graphData)[key]] == "object")
             {
                 key = Object.keys(graphData)[key]
+
                 // console.log(key)
-                graphDates[key] = Object.keys(graphData[key]).sort()
-                graphObjs[key] = graphDates[key].map(function(d) {return graphData[key][d]})
-                graphPoints[key] = graphObjs[key].map(function(d) {return d[param][type]})
+                // graphDates[key] = Object.keys(graphData[key]).sort()
+                // graphObjs[key] = graphDates[key].map(function(d) {return graphData[key][d]})
+                // graphPoints[key] = graphObjs[key].map(function(d) {return d[param][type]})
+
+                //console.log(key)
+                if (key == 'bos' || key == 'chi')
+                {
+                    //console.log(Object.keys(graphData[key]).sort())
+                    graphDates[key] = Object.keys(graphData[key]).sort().map(function(d)
+                    { 
+                        var date = new Date(d)
+                        date.setTime(date.getTime() +  (1 * 24 * 60 * 60 * 1000));
+                        return date
+                    })
+
+                    console.log(graphDates[key][0],graphDates[key].last())
+                }
+
+                else
+                {
+                    graphDates[key] = Object.keys(graphData[key]).sort().map(function(d) { return new Date(d); })
+                }
+                graphObjs[key] = Object.keys(graphData[key]).sort().map(function(d) { return d; }).map(function(d) {return graphData[key][d]})
+                graphPoints[key] = graphObjs[key].map(function(d) {return d[param][type]})  
+
             }  
 
         }
 
-        // console.log(graphDates,graphObjs,graphPoints)
 
         var dates_arrs = Object.keys(graphDates).map(function (key) {
             return graphDates[key]
         })
 
         var dates = [];
-        dates = dates.concat.apply(dates, dates_arrs).sort();
-        // console.log(dates)
+
+        dates = dates.concat.apply(dates, dates_arrs)
+        dates = dates.sort(function(date1,date2)
+            {
+              if (date1 > date2) return 1;
+              if (date1 < date2) return -1;
+              return 0;
+            });
+
+        console.log(dates)
+
 
         var points_arrs = Object.keys(graphPoints).map(function (key) {
             return graphPoints[key]
         })
+
+
         // console.log(points_arrs)
         var points = [];
         points = points.concat.apply(points, points_arrs).sort();
         // console.log(points)
 
-        var xScaleGraph = d3.time.scale()
-                        .domain([new Date(dates[0]),new Date(dates[dates.length-1])])
+        xScaleGraph = d3.time.scale()
+                        .domain([dates[0],dates.last()])
                         .range([(graphVis.x+margin.left),(margin.left + graphVis.x+graphVis.w-margin.right)])
         
-        var yScaleGraph = d3.scale.linear()
+        xScaleBrush = d3.time.scale()
+                        .domain([dates[0],dates[dates.length-1]])
+                        .range([0,(graphVis.w)])
+
+        brush = d3.svg.brush()
+            .x(xScaleBrush)
+            .on("brush", brushed);
+
+        yScaleGraph = d3.scale.linear()
             .domain([(points.min()*0.9),(points.max()*1.1)])
             .range([graphVis.y+graphVis.h-margin.top-300,graphVis.y+margin.top])
 
@@ -537,12 +585,18 @@ createGraph = function(param,type) {
           .scale(yScaleGraph)
           .orient("left");
 
+        var xAxisBrush = d3.svg.axis()
+          .scale(xScaleBrush)
+          .orient("bottom");
+
+
+
         for (key in Object.keys(graphData))
         {
             if (typeof graphData[Object.keys(graphData)[key]] == "object")
             {
                 key = Object.keys(graphData)[key]
-                graphPointPairs[key] = graphPoints[key].map(function(d,i) {return [xScaleGraph(new Date(graphDates[key][i])),yScaleGraph(d)]})
+                graphPointPairs[key] = graphPoints[key].map(function(d,i) {return [xScaleGraph(graphDates[key][i]),yScaleGraph(d)]})
 
                 graphCanvas.selectAll('circle.'+key)
                     .data(graphObjs[key])
@@ -551,7 +605,7 @@ createGraph = function(param,type) {
                     .classed(key,true)
                     .attr({
                         r: pointRadius,
-                        cx: function(d){return xScaleGraph(new Date(d.date))},
+                        cx: function(d,i){console.log(new Date(d.date));return xScaleGraph(new Date(d.date))},
                         cy: function(d){return yScaleGraph(d[param][type])},
                         fill: function(d) 
                         {
@@ -591,12 +645,36 @@ createGraph = function(param,type) {
                 return "rotate(-65)" 
                 });;
 
+        graphCanvas.append("g")
+            .classed("axis",true)
+            .classed("brusher",true)
+            .call(xAxisBrush)
+            .attr("transform", "translate(" + (brushVis.x) + "," + (brushVis.y) + ")")
+            .selectAll('text')
+            .style("text-anchor", "end")
+            .attr("transform", function(d) {
+                return "rotate(-65)" 
+                })
+            //.on('brush',brushed)
+
 
         graphCanvas.append("g")
             .classed("axis",true)
             .classed("yaxis",true)
             .call(yAxisGraph)
             .attr("transform", "translate("+ xScaleGraph.range()[0] +"," + 0 + ")");
+
+        var overview = graphCanvas.append("g")
+            .attr("class", "overview")
+            .attr("transform", "translate(" + brushVis.x + "," + brushVis.y + ")");
+
+        var thisBrush = overview.append("g")
+          .attr("class", "x brush")
+          .call(brush);
+
+        thisBrush.selectAll("rect")
+          .attr("y", -6)
+          .attr("height", brushVis.h + 10);
 
     }})
 }
@@ -612,6 +690,7 @@ var updateGraph = function(param,type)
 
     for (key in Object.keys(graphData))
     {
+        // filter out methods at end of array
         if (typeof graphData[Object.keys(graphData)[key]] == "object")
         {
             key = Object.keys(graphData)[key]
@@ -626,22 +705,23 @@ var updateGraph = function(param,type)
 
     var dates = [];
     dates = dates.concat.apply(dates, dates_arrs).sort();
-    // console.log(dates)
 
 
     var points_arrs = Object.keys(graphPoints).map(function (key) {
             return graphPoints[key]
         })
+
     // console.log(points_arrs)
     var points = [];
     points = points.concat.apply(points, points_arrs).sort();
     // console.log(points)
 
 
+/*
     xScaleGraph = d3.time.scale()
                     .domain([new Date(dates[0]),new Date(dates.last())])
                     .range([(graphVis.x+margin.left),(margin.left + graphVis.x+graphVis.w-margin.right)])
-        
+*/      
     yScaleGraph = d3.scale.linear()
         .domain([(points.min()*0.9),(points.max()*1.1)])
         .range([graphVis.y+graphVis.h-margin.top-300,graphVis.y+margin.top])
@@ -659,13 +739,22 @@ var updateGraph = function(param,type)
         if (typeof graphData[Object.keys(graphData)[key]] == "object")
         {
             key = Object.keys(graphData)[key]
-            graphPointPairs[key] = graphPoints[key].map(function(d,i) {return [xScaleGraph(new Date(graphDates[key][i])),yScaleGraph(d)]})
+            graphPointPairs[key] = graphPoints[key].map(function(d,i) {return [xScaleGraph(graphDates[key][i]),yScaleGraph(d)]})
 
             graphCanvas.selectAll('circle.'+key)
                 .transition()
                 .attr({
                     r: pointRadius,
-                    cx: function(d){return xScaleGraph(new Date(d.date))},
+                    cx: function(d){
+                        if (key == 'chi' || key == 'bos')
+                        {
+                            var date = new Date(d.date)
+                            date.setTime(date.getTime() +  (1 * 24 * 60 * 60 * 1000));
+                            return xScaleGraph(date)
+                        }
+                        else
+                            return xScaleGraph(new Date(d.date))
+                    },
                     cy: function(d){return yScaleGraph(d[param][type])},
                     fill: function(d) 
                     {
@@ -683,8 +772,6 @@ var updateGraph = function(param,type)
                 .transition()
                 .attr('d','M' + interpolateLinear(graphPointPairs[key]))
  
-
-            // console.log(graphPointPairs['dc'])
 
         }
     }
@@ -710,7 +797,11 @@ createGraph('dist','Casual');
 
 //console.log(dc_data)
 
-
+// brush function for mouse
+function brushed() {
+    //console.log(brush.empty() ? xScaleGraph.domain() : brush.extent())
+    xScaleGraph.domain(brush.empty() ? xScaleGraph.domain() : brush.extent());
+    updateGraph(graphStat,graphType)
 
 d3.select("input[value=\"dist\"]").on("click", function(){updateGraph('dist',graphType); updateMap('distance', mapRider);});
 d3.select("input[value=\"speed\"]").on("click", function(){updateGraph('speed',graphType);updateMap('avg_speed', mapRider);});
