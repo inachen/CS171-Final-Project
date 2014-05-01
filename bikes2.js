@@ -803,8 +803,8 @@ createGraph = function(param,type) {
           .call(brush);
 
         thisBrush.selectAll("rect")
-          .attr("y", -6)
-          .attr("height", brushVis.h + 10);
+          .attr("y", 22)
+          .attr("height", brushVis.h - 160);
 
     }})
 }
