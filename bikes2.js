@@ -28,14 +28,14 @@ var graphVis = {
     x: 100,
     y: 30,
     w: width - map_width + 20,
-    h: 700
+    h: 750
 };
 
 var brushVis = {
     x: 100,
-    y: 0.9*graphVis.h,
+    y: 0.9*graphVis.h -70,
     w: width - map_width + 20,
-    h: 170
+    h: 240
 };
 
 var mapVis = {
@@ -62,8 +62,8 @@ var map = new L.Map(container, {center: [38.934156, -77.05386], zoom: 10, maxZoo
 //        mapVis.panTo(L.mouseEventToLatLng(e));
 // });
 
-var mapCanvas = d3.select(map.getPanes().overlayPane).append("svg"),
-    mapsvg = mapCanvas.append("g").attr("class", "leaflet-zoom-hide");
+var mapCanvas = d3.select(map.getPanes().overlayPane).append("svg");
+var mapsvg = mapCanvas.append("g").attr("class", "leaflet-zoom-hide");
 
 
 var graphsvg = graphCanvas.append("g")
@@ -116,16 +116,16 @@ var mapCity = "boston";
 
 var metric_info = {
     "distance":{
-        text: "Average Distance Traveled per Trip"
+        text: "Average Distance of Trips (miles)"
     },
     "avg_speed":{
-        text: "Average Speed of Rides"
+        text: "Average Speed of Trips (mph)"
     },
     "rides":{
-        text: "Number of Rides"
+        text: "Number of Rides (total)"
     },
     "duration":{
-        text: "Average Duration of Trips"
+        text: "Average Duration of Trips (minutes)"
 
     }
 }
@@ -208,10 +208,10 @@ function circle_style(circles) {
             //             .range(d3.range(classes));
             // }
 
-            circles.attr('opacity', 0.4)
-                .attr('stroke', scheme[classes - 1])
+            circles.attr('opacity', 0.2)
+                .attr('stroke', '#4d004b') //scheme[classes - 1])
                 .attr('stroke-width', 1)
-                .attr('fill', scheme[4])
+                .attr('fill', scheme[5])
                 // function (d) {
                 //     if (weekdata[d["id"].toString()]!= null) 
                 //         {return scheme[4];}
@@ -232,7 +232,8 @@ function circle_style(circles) {
 
                 var t = '<h3><%- name %></h3>' +
                         '<ul>' +
-                        '<li><%- metric %>, <%- type %> riders</li>' +
+                        '<li><%- metric %></li>'+
+                        '<li><%- type %> riders</li>' +
                         '</ul>' +
                         '<div class="tip-weekday-chart"></div>' +
                         '<div class="curr_pop" id=<%- id %> > </div>';
@@ -270,21 +271,32 @@ map.on('popupopen', function(e){
 
     var pop_data = weekdata[pop_id.toString()][mapRider][mapMetric]["days"];
 
+    if (mapMetric == 'avg_speed')
+    {
+        pop_data = weekdata[pop_id.toString()][mapRider][mapMetric]["days"].map(function(x) {return x * 3600;});
+    }
+
+    else if (mapMetric == "duration")
+    {
+        pop_data = weekdata[pop_id.toString()][mapRider][mapMetric]["days"].map(function(x) {return x / 60;});
+    }
+
+
     var pop_yScale = d3.scale.linear().domain([0, pop_data.max()])
         .rangeRound([100, 10]);
     var pop_xScale = d3.scale.ordinal().domain(['Su', 'M', 'T', 'W', 'Th', 'F', 'S'])
-        .range([50, 70, 90, 110, 130, 150, 170, 190]);
+        .range([70, 90, 110, 130, 150, 170, 190, 210]);
 
     var weeks = ['Su', 'M', 'T', 'W', 'Th', 'F', 'S']
 
-    var pop_yAxis = d3.svg.axis().scale(pop_yScale).orient("left").ticks(6).tickFormat(d3.format(".2f"));
+    var pop_yAxis = d3.svg.axis().scale(pop_yScale).orient("left").ticks(6).tickFormat(d3.format(".1f"));
     var pop_xAxis = d3.svg.axis().scale(pop_xScale).orient("bottom");
 
     console.log(pop_xScale('M'));
     console.log(pop_data);
 
     var pop_svg = d3.select("div.tip-weekday-chart").append("svg")
-        .attr("width", 200)
+        .attr("width", 220)
         .attr("height", 130)
 
     pop_svg.selectAll("rect")
@@ -294,6 +306,7 @@ map.on('popupopen', function(e){
        .attr("x", function(d, i){return pop_xScale(weeks[i])})
        .attr("y", function(d){return pop_yScale(d);})
        .attr("width", 19)
+       .attr("fill", '#404040')
        .attr("height", function (d){return (100 - pop_yScale(d));});
 
     pop_svg.append("g")
@@ -305,7 +318,7 @@ map.on('popupopen', function(e){
 
     pop_svg.append("g")
         .attr("class", "axis y")
-        .attr("transform", "translate(45,0)")
+        .attr("transform", "translate(65,0)")
         .call(pop_yAxis);
 
 
@@ -391,7 +404,7 @@ function loadStats(subkey, typekey, city){
             return (value != 0);
         }));
 
-            radius_scale = d3.scale.linear().domain([min, max]).range([3, 10]);
+            radius_scale = d3.scale.linear().domain([min, max]).range([3, 11]);
 
             // console.log(radius_scale);
 
@@ -668,11 +681,13 @@ createGraph = function(param,type) {
 
         var xAxisBrush = d3.svg.axis()
           .scale(xScaleBrush)
-          .orient("bottom");
+          .orient("bottom")
+          .tickFormat(d3.time.format("%b"));
 
         var yAxisBrush = d3.svg.axis()
           .scale(yScaleBrush)
-          .orient("left");
+          .orient("left")
+          .ticks(3);
 
         for (key in Object.keys(graphData))
         {
