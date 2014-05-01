@@ -35,7 +35,7 @@ var brushVis = {
     x: 100,
     y: 0.9*graphVis.h,
     w: width - map_width + 20,
-    h: 170
+    h: 200
 };
 
 var mapVis = {
@@ -833,16 +833,20 @@ var updateGraph = function(param,type)
         .domain([(points.min()*0.9),(points.max()*1.1)])
         .range([graphVis.y+graphVis.h-margin.top-300,graphVis.y+margin.top])
 
-    yScaleBrush = d3.scale.linear()
+    var yScaleBrush = d3.scale.linear()
         .domain([(points.min()*0.9),(points.max()*1.1)])
         .range([brushVis.y+margin.top,brushVis.y+brushVis.h-margin.top-300])
         
-    xAxisGraph = d3.svg.axis()
+    var xAxisGraph = d3.svg.axis()
       .scale(xScaleGraph)
       .orient("bottom");
 
-    yAxisGraph = d3.svg.axis()
+    var yAxisGraph = d3.svg.axis()
       .scale(yScaleGraph)
+      .orient("left");
+
+    var yAxisBrush = d3.svg.axis()
+      .scale(yScaleBrush)
       .orient("left");
 
 
@@ -918,6 +922,12 @@ var updateGraph = function(param,type)
     d3.selectAll('.yaxis')
         .transition()
         .call(yAxisGraph)
+        .attr("transform", "translate("+ xScaleGraph.range()[0] +"," + 0 + ")")
+
+
+    d3.selectAll('.ybrusher')
+        .transition()
+        .call(yAxisBrush)
         .attr("transform", "translate("+ xScaleGraph.range()[0] +"," + 0 + ")")
 
 }
