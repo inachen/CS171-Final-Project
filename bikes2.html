@@ -6,25 +6,21 @@
 
 
 <body>
-
-  <form>
-  Metric:
-    <label><input type="radio" name="param" value="dist" checked> Distance</label>
-    <label><input type="radio" name="param" value="speed" > Speed</label>
-    <label><input type="radio" name="param" value="rides"> Rides/Day</label>  
-    <label><input type="radio" name="param" value="time" > AverageRide Duration</label>
+<div class="control-form">
+  <form >
+    <!-- <p class="form-choice">Metric</p> -->
+    <input type="radio" class="forminput"id="metric1" name="param" value="dist" checked><label for="metric1" > Average Distance Per Trip</label>
+    <input type="radio" class="forminput"id="metric2" name="param" value="speed" ><label for="metric2"> Average Speed</label>
+    <input type="radio" class="forminput"id="metric3" name="param" value="rides"><label for="metric3"> Total Trips</label>  
+    <input type="radio" class="forminput"id="metric4" name="param" value="time" ><label for="metric4"> Average Trip Duration</label>
   </form>
+  <br>
   <form>
-  Rider:
-    <label><input type="radio" name="type" value="Casual" checked> Casual</label>
-    <label><input type="radio" name="type" value="Subscriber" > Subscriber</label>
+    <!-- <p class="form-choice">Rider</p> -->
+    <input type="radio" class="forminput"id="rider1" name="type" value="Casual" checked> <label for="rider1">Casual Riders</label>
+    <input type="radio" class="forminput"id="rider2" name="type" value="Subscriber" > <label for="rider2">Subscriber Riders</label>
   </form>
-  <form>
-  Map:
-    <label><input type="radio" name="type" value="boston" checked> Boston</label>
-    <label><input type="radio" name="type" value="chicago" > Chicago</label>
-    <label><input type="radio" name="type" value="dc" > DC</label>
-  </form>
+</div>
   
 <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
 <script src="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.2/leaflet.js"></script>
@@ -160,6 +156,15 @@
         opacity: .3;
     }
 
+    .control-form{
+      text-align: center;
+    }
+
+    .form-choice{
+      float: center;
+      display: inline-block;
+    }
+
     .d3-tip {
       line-height: 1.5;
       padding: 6px;
@@ -206,6 +211,54 @@
       height: 0px;
     }
 
+    /*prettify buttons adapted from http://viralpatel.net/blogs/css-radio-button-checkbox-background/ */
+
+      input[type=radio][class="forminput"] {
+        display:none; 
+        margin:10px;
+    }
+     
+
+    input[type=radio][class="forminput"] + label {
+
+        display:inline-block;
+        margin:0px;
+        padding: 4px 12px;
+        background-color: #e7e7e7;
+        border-color: #fff; /*#ddd;*/
+        width: 300px;
+        text-align: center;
+        border-radius: 10px;
+    }
+
+    input[type=radio][class="forminput"]:checked + label { 
+        background-image: none;
+        background-color:#d0d0d0;
+    }
+
+    input[type=radio][class=mapinput] {
+        display:none; 
+        margin:10px;
+    }
+     
+
+    input[type=radio][class=mapinput] + label {
+
+        display:inline-block;
+        margin:0px;
+        padding: 4px 12px;
+        background-color: #e7e7e7;
+        border-color: #fff; /*#ddd;*/
+        width: 100px;
+        text-align: center;
+        /*border-radius: 50px;*/
+    }
+
+    input[type=radio][class=mapinput]:checked + label { 
+        background-image: none;
+        background-color:#d0d0d0;
+    }
+
 
 </style>
 
@@ -213,7 +266,12 @@
 
 <table>
     <tr><td><div id="graphVis"></div></td>
-      <td><div id="mapVis" class="mapVis"></div></td></tr>
+      <td>  <form>
+    <input class="mapinput" id="map1" type="radio" name="type" value="boston" checked> 
+    <label for="map1">Boston</label>
+    <input class="mapinput" id="map2" type="radio" name="type" value="chicago" ><label for="map2"> Chicago </label>
+    <input class="mapinput" id="map3" type="radio" name="type" value="dc" > <label for="map3" > DC </label>
+  </form><div id="mapVis" class="mapVis"></div></td></tr>
     <!-- <tr><td><div id="buttons"></div></td></tr> -->
     <!-- <tr><td><div id="mapVis"></div></td></tr> -->
 </table>
