@@ -45,6 +45,10 @@
       font-size: 12px;
     }
 
+    /*h3{
+      font-size: 40px;
+    }*/
+
     svg{
         /*background: #eeeeee;*/
     }
@@ -66,17 +70,13 @@
         /*font-weight: lighter;*/
     }
 
-/*    .axis text {
-        font: 10px sans-serif;
-    }
-
-    .axis line,
+/*    .axis line,
     .axis path {
         fill: none;
         stroke: #000;
         shape-rendering: crispEdges;
-    }
-*/
+    }*/
+
    #mapVis {
   width: 600px;
   height: 500px;
@@ -89,11 +89,18 @@
     .leaflet-popup-content ul { 
       padding-left: 0em; 
       list-style-type: none;
+      margin: 5px;
 
     }
 
     .leaflet-popup-content {
       padding: 0px;
+      margin: 10px;
+    }
+
+    .leaflet-container h3{
+      font-size: 12px;
+      margin: 0px;
     }
 
     
@@ -136,10 +143,16 @@
       width: 1.5px ;
     }*/
 
+    .axis text {
+      font: 8px;
+      fill: darkgrey;
+    }
+
     .axis path,
     .axis line {
         fill: none;
         stroke: lightgrey;
+        stroke-width: 1px;
         shape-rendering: crispEdges;
     }
     .brush .extent{
@@ -178,6 +191,19 @@
       font-size: 12px;
       stroke: none;
       font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    .tip-weekday-chart{
+      /*width: 225px;*/
+      height: 125px;
+      text-align: center;
+      stroke-width: 1.5px;
+      min-width: 220px;
+    }
+
+    .curr_pop{
+      width: 0px;
+      height: 0px;
     }
 
 

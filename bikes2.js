@@ -60,6 +60,7 @@ var map = new L.Map(container, {center: [38.934156, -77.05386], zoom: 10, maxZoo
 //     .on('click', function(e) {
 //        mapVis.panTo(L.mouseEventToLatLng(e));
 // });
+
 var mapCanvas = d3.select(map.getPanes().overlayPane).append("svg"),
     mapsvg = mapCanvas.append("g").attr("class", "leaflet-zoom-hide");
 
@@ -112,8 +113,59 @@ var mapRider = "Casual";
 var mapMetric = "distance";
 var mapCity = "boston";
 
+var metric_info = {
+    "distance":{
+        text: "Average Distance Traveled per Trip"
+    },
+    "avg_speed":{
+        text: "Average Speed of Rides"
+    },
+    "rides":{
+        text: "Number of Rides"
+    },
+    "duration":{
+        text: "Average Duration of Trips"
+
+    }
+}
+
+// city info
+var city_info = {
+    "boston": { 
+        zoomlat: 42.329228,
+        zoomlong: -71.090813,
+        zoomlvl: 11, 
+        mapfile: "/data/boston.geojson",
+        datafile: "/data/bos_map_weekday_stats.json",
+        stationfile: "/data/bos-stations.json",
+        loaded: false
+    },
+    "chicago": {
+        zoomlat: 41.817225,
+        zoomlong: -87.684631,
+        zoomlvl: 10,
+        mapfile: "/data/zchicago.geojson",
+        datafile: "/data/chi_map_weekday_stats.json",
+        stationfile: "/data/chi-stations.json",
+        loaded: false
+    },
+    "dc": {
+        zoomlat: 38.934156,
+        zoomlong: -77.05386,
+        zoomlvl: 10,
+        mapfile: "/data/washington.geojson",
+        datafile: "/data/dc_map_weekday_stats.json",
+        stationfile: "/data/dc-stations.json",
+        loaded: false
+    }
+}
+
+
+
 var classes = 9, scheme_id = "BuPu",
     scheme = colorbrewer[scheme_id][classes];
+
+var mapLoaded = false;
 
 var stations_layer;
 
@@ -121,6 +173,11 @@ var transform;
 var path;
 
 var radius_scale;
+
+var mapFeatures;
+var mapCollection;
+
+// var popup_data;
 
 var station_tip = d3.tip()
   .attr('class', 'd3-tip')
@@ -136,7 +193,7 @@ var neigh_tip = d3.tip()
     // console.log(d);
     return d['properties']['name'];
   })
-  .offset([0, 10])
+  .offset([0, 1])
   .direction('e');
 
 mapsvg.call(station_tip);
@@ -170,15 +227,33 @@ function circle_style(circles) {
             circles.on('click', function (d, i) {
                 L.DomEvent.stopPropagation(d3.event);
 
+                // popup_data = weekdata[d["id"].toString()][mapRider][mapMetric]["days"];
+
                 var t = '<h3><%- name %></h3>' +
                         '<ul>' +
-                        '<li>id: <%- id %></li>' +
-                        '</ul>';
+                        '<li><%- metric %>, <%- type %> riders</li>' +
+                        '</ul>' +
+                        '<div class="tip-weekday-chart"></div>' +
+                        '<div class="curr_pop" id=<%- id %> > </div>';
 
                 var data = {
-                        id: d.id,
+                        metric: metric_info[mapMetric].text,
+                        type: mapRider,
                         name: d.properties.name,
+                        id: d["id"]
                     };
+
+
+                
+                // selectAll("div").data(popup_data)
+                // .enter().append("div")
+                // .attr("height", function(d) { return d * 10 + "px"; })
+                // .attr("width", 5)
+                // .attr("x", function(d,i){return i * 6})
+                // .attr("y", 0)
+                // .attr("fill", "black")
+
+                // console.log(L.popup().options)
 
                 L.popup()
                     .setLatLng([d.geometry.coordinates[1], d.geometry.coordinates[0]])
@@ -188,16 +263,63 @@ function circle_style(circles) {
             });
         }
 
+// add weekly chart to popup
+map.on('popupopen', function(e){
+    var pop_id = document.querySelectorAll(".curr_pop")[0].getAttribute("id");
+
+    var pop_data = weekdata[pop_id.toString()][mapRider][mapMetric]["days"];
+
+    var pop_yScale = d3.scale.linear().domain([0, pop_data.max()])
+        .rangeRound([100, 10]);
+    var pop_xScale = d3.scale.ordinal().domain(['Su', 'M', 'T', 'W', 'Th', 'F', 'S'])
+        .range([50, 70, 90, 110, 130, 150, 170, 190]);
+
+    var weeks = ['Su', 'M', 'T', 'W', 'Th', 'F', 'S']
+
+    var pop_yAxis = d3.svg.axis().scale(pop_yScale).orient("left").ticks(6).tickFormat(d3.format(".2f"));
+    var pop_xAxis = d3.svg.axis().scale(pop_xScale).orient("bottom");
+
+    console.log(pop_xScale('M'));
+    console.log(pop_data);
+
+    var pop_svg = d3.select("div.tip-weekday-chart").append("svg")
+        .attr("width", 200)
+        .attr("height", 130)
+
+    pop_svg.selectAll("rect")
+       .data(pop_data)
+       .enter()
+       .append("rect")
+       .attr("x", function(d, i){return pop_xScale(weeks[i])})
+       .attr("y", function(d){return pop_yScale(d);})
+       .attr("width", 19)
+       .attr("height", function (d){return (100 - pop_yScale(d));});
+
+    pop_svg.append("g")
+        .attr("class", "axis x")
+        .attr("transform", "translate(0,105)")
+        .call(pop_xAxis)
+        .selectAll("text")
+        .attr("transform", "translate(10, 0)");
+
+    pop_svg.append("g")
+        .attr("class", "axis y")
+        .attr("transform", "translate(45,0)")
+        .call(pop_yAxis);
+
+
+})
+
 function updateMap(typekey, subkey) {
 
     // console.log(map);
 
     map.removeLayer(stations_layer);
 
-    loadStats(subkey, typekey);
-
     mapRider = subkey;
     mapMetric = typekey;
+
+    loadStats(subkey, typekey, mapCity);
 
     // console.log(map);
 
@@ -214,13 +336,10 @@ function updateMap(typekey, subkey) {
 
     // // console.log(stations_layer.options.radius);
 
-
-
-
 }
 
 
-function loadStations(subkey, typekey) {
+function loadStations(subkey, typekey, city) {
 
     // d3.csv("/data/dc-stations.csv", function(collection) {
     //         L.pointsLayer(collection, {
@@ -229,9 +348,12 @@ function loadStations(subkey, typekey) {
     //         }).addTo(mapVis);
     //     });
 
-    d3.json("/data/dc-stations.json", function(collection) {
+
+
+    // console.log(stationfile);
+
+    d3.json(city_info[city].stationfile, function(collection) {
         // console.log("hi");
-        // console.log(collection);
         stations_layer = new L.PointsLayer(collection, {
             radius: function(d){ 
                 if (weekdata[d["id"].toString()] != null && weekdata[d["id"].toString()][subkey][typekey]['avg'] != 0 ) 
@@ -245,83 +367,37 @@ function loadStations(subkey, typekey) {
 
     });
 
-            // var chart = timeseries_chart(scheme)
-            //         .x(get_time).xLabel("Earthquake origin time")
-            //         .y(get_magnitude).yLabel("Magnitude")
-            //         .brushmove(on_brush);
-
-            // d3.select("body").datum(collection.features).call(chart);
-        // });
-
-        
-    // d3.csv("/data/dc-stations.csv",function(error,data){
-    //     stations = mapsvg.selectAll(".station")
-    //         .data(data)
-    //     .enter().append("circle")
-    //     .filter(function(d) { return (map.latLngToLayerPoint(new L.LatLng(+d["lat"], +d["long"])) != null ) })  
-    //       .attr("class", "station hasData")
-    //       .attr("cx", function(d) { coords = map.latLngToLayerPoint(new L.LatLng(+d["lat"], +d["long"]));
-    //             console.log(coords);
-    //             if (coords != null){return coords.x }})
-    //      .attr("cy", function(d) { coords = map.latLngToLayerPoint(new L.LatLng(+d["lat"], +d["long"]));
-    //             if (coords != null){return coords.y }})
-    //      .attr("r", 5)
-    //      .attr("fill",  scheme[5])
-    //      .attr('stroke', scheme[classes - 1])
-    //      .attr('stroke-width', 1)
-    //     .on('mouseover', station_tip.show)
-    //     .on('mouseout', station_tip.hide);
-
-          // map.on("viewreset", reset);
-          // reset();
-
-          // Reposition the SVG to cover the features.
-       //    function reset() {
-
-       //      var bounds = path.bounds(stations),
-       //          topLeft = bounds[0],
-       //          bottomRight = bounds[1];
-
-       //      // console.log(bounds)
-
-       //      mapCanvas .attr("width", bottomRight[0] - topLeft[0])
-       //          .attr("height", bottomRight[1] - topLeft[1])
-       //          .style("left", topLeft[0] + "px")
-       //          .style("top", topLeft[1] + "px");
-
-       //      mapsvg   .attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
-
-       //  stations.attr("cx", function (d) { return map.latLngToLayerPoint(new L.LatLng(+d["lat"], +d["long"])).x; })
-       // .attr("cy", function (d) { return map.latLngToLayerPoint(new L.LatLng(+d["lat"], +d["long"])).y; });
-   // }
-    // });
 }
 
-function loadStats(subkey, typekey){
- d3.json("/data/dc_map_weekday_stats.json", function(error,data){
-        weekdata = data;
+function loadStats(subkey, typekey, city){
 
-        var max = Math.max.apply(null,
-                        Object.keys(data).map(function(e) {
-                                return data[e][subkey][typekey]["avg"];
-                        }).filter(function (value) {
-        return (value != 0);
-    }));
-        var min = Math.min.apply(null,
-                        Object.keys(data).map(function(e) {
-                                return data[e][subkey][typekey]["avg"];
-                        }).filter(function (value) {
-        return (value != 0);
-    }));
 
-        radius_scale = d3.scale.linear().domain([min, max]).range([3, 10]);
+     d3.json(city_info[city].datafile, function(error,data){
 
-        // console.log(radius_scale);
+        // console.log(data);
+            weekdata = data;
 
-        // console.log(radius_scale(1));
-        
-        loadStations(subkey, typekey);
-    })
+            var max = Math.max.apply(null,
+                            Object.keys(data).map(function(e) {
+                                    return data[e][subkey][typekey]["avg"];
+                            }).filter(function (value) {
+            return (value != 0);
+        }));
+            var min = Math.min.apply(null,
+                            Object.keys(data).map(function(e) {
+                                    return data[e][subkey][typekey]["avg"];
+                            }).filter(function (value) {
+            return (value != 0);
+        }));
+
+            radius_scale = d3.scale.linear().domain([min, max]).range([3, 10]);
+
+            // console.log(radius_scale);
+
+            // console.log(radius_scale(1));
+            
+            loadStations(subkey, typekey, city);
+        })
 }
 
 function clicked(d) {
@@ -331,117 +407,102 @@ function clicked(d) {
   map.panTo(new L.LatLng(centroid));
   // mapVis.panTo(centroid);
 
-  // console.log(centroid)
-
-    // var bounds = path.bounds(collection),
-    //     topLeft = bounds[0],
-    //     bottomRight = bounds[1];
-
-    // mapCanvas .attr("width", bottomRight[0] - topLeft[0])
-    //     .attr("height", bottomRight[1] - topLeft[1])
-    //     .style("left", topLeft[0] + "px")
-    //     .style("top", topLeft[1] + "px");
-
-    // mapsvg   .attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
-
-  // if (d && centered !== d) {
-  //   var centroid = path.centroid(d);
-  //   x = centroid[0];
-  //   y = centroid[1];
-  //   k = 3;
-  //   centered = d;
-  // } else {
-  //   x = mapVis.w / 2;
-  //   y = mapVis.h / 2;
-  //   k = 1;
-  //   centered = null;
-  // }
-
-  // mapsvg.selectAll("path")
-  //     .classed("active", centered && function(d) { return d === centered; });
-
-  // mapsvg.transition()
-  //     .duration(750)
-  //     .attr("transform", "translate(" + mapVis.w / 2 + "," + mapVis.h / 2 + ")scale(" + k + ")translate(" + -x + "," + -y + ")")
-  //     .style("stroke-width", 1/k + "px");
 }
 
-// boston
-// d3.json("/data/boston.json", function(error, data) {
-
-//     // console.log(data);
-//     projection.scale(100000).center([-71.090813, 42.309228]);
-
-//     var cityMap = topojson.feature(data,data.objects.boston).features;
-//     // console.log(cityMap);
-
-//     mapsvg.selectAll(".city").data(cityMap).enter().append("path")
-//         .attr("class", "city")
-//         .attr("d", path).on("click", clicked);
-//     // see also: http://bl.ocks.org/mbostock/4122298
-
-// });
-
-// chicago
-// d3.json("/data/chicago.json", function(error, data) {
-
-//     // console.log(data);
-//     projection.scale(40000).center([-87.684631, 41.817225]);
-
-//     var cityMap = topojson.feature(data,data.objects.chicago).features;
-//     // console.log(cityMap);
-
-//     mapsvg.selectAll(".city").data(cityMap).enter().append("path")
-//         .attr("class", "city")
-//         .attr("d", path).on("click", clicked);
-//     // see also: http://bl.ocks.org/mbostock/4122298
-
-// });
 
 // washington
-d3.json("/data/washington.geojson", function(collection) {
+function loadMap(city){
 
-  transform = d3.geo.transform({point: projectPoint});
-      path = d3.geo.path().projection(transform);
+    city_info[city].loaded = true;
 
-  var feature = mapsvg.selectAll("path")
-      .data(collection.features)
-    .enter().append("path")
-    .attr("class", "city")
-    .on('mouseover', neigh_tip.show)
-    .on('mouseout', neigh_tip.hide);
+    map.panTo(new L.LatLng(city_info[city].zoomlat, city_info[city].zoomlong));
+    map.setZoom(city_info[city].zoomlvl);
 
-  map.on("viewreset", reset);
-  reset();
+    // console.log(curr_city)
 
-  // Reposition the SVG to cover the features.
-  function reset() {
-    var bounds = path.bounds(collection),
-        topLeft = bounds[0],
-        bottomRight = bounds[1];
+    d3.json(city_info[city].mapfile, function(collection) {
 
-    // console.log(bounds)
+    // console.log(collection);
 
-    mapCanvas .attr("width", bottomRight[0] - topLeft[0])
-        .attr("height", bottomRight[1] - topLeft[1])
-        .style("left", topLeft[0] + "px")
-        .style("top", topLeft[1] + "px");
+      transform = d3.geo.transform({point: projectPoint});
+          path = d3.geo.path().projection(transform);
 
-    mapsvg.attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
+      mapFeatures = mapsvg.selectAll("path")
+          .data(collection.features)
+        .enter().append("path")
+        .attr("class", "city")
+        .on('mouseover', neigh_tip.show)
+        .on('mouseout', neigh_tip.hide);
+
+      mapCollection = collection;
+
+      mapLoaded = true;
+
+      reset();
+
+      // Use Leaflet to implement a D3 geometric transformation.
+      function projectPoint(x, y) {
+        var point = map.latLngToLayerPoint(new L.LatLng(y, x));
+        this.stream.point(point.x, point.y);
+      }
+
+        loadStats(mapRider, mapMetric, mapCity);
+        // loadStations(mapRider, mapMetric, mapCity);
+
+    });
+}
+
+function changeMap(city)
+{
+    map.removeLayer(stations_layer);
+    mapsvg.selectAll("path").remove();
+
+    mapCity = city;
+    loadMap(city);
+
+    // if (city_info[city].loaded)
+    // {
+    //     mapCity = city;
+    //     map.panTo(new L.LatLng(city_info[city].zoomlat, city_info[city].zoomlong));
+    //     map.setZoom(city_info[city].zoomlvl);
+    //     updateMap(mapMetric, mapRider);
+
+    // }
+
+    // else
+    // {
+    //     mapCity = city;
+    //     loadMap(city);
+    // }
+
+}
+
+map.on("viewreset", reset);
+
+// Reposition the SVG to cover the features.
+function reset() {
+    if (mapLoaded)
+    {
+        var bounds = path.bounds(mapCollection),
+            topLeft = bounds[0],
+            bottomRight = bounds[1];
+
+        // console.log(bounds)
+
+        mapCanvas .attr("width", bottomRight[0] - topLeft[0])
+            .attr("height", bottomRight[1] - topLeft[1])
+            .style("left", topLeft[0] + "px")
+            .style("top", topLeft[1] + "px");
+
+        mapsvg.attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
 
 
-    feature.attr("d", path);//.on("click", clicked);
-  }
+        mapFeatures.attr("d", path);//.on("click", clicked);
+    }
+}
 
-  // Use Leaflet to implement a D3 geometric transformation.
-  function projectPoint(x, y) {
-    var point = map.latLngToLayerPoint(new L.LatLng(y, x));
-    this.stream.point(point.x, point.y);
-  }
-
-    loadStats(mapRider, mapMetric);
-
-});
+loadMap(mapCity);
+// loadStats(mapRider, mapMetric, mapCity);
 
 
 // console.log(screencoord[2])
@@ -522,7 +583,7 @@ createGraph = function(param,type) {
                         return date
                     })
 
-                    console.log(graphDates[key][0],graphDates[key].last())
+                    // console.log(graphDates[key][0],graphDates[key].last())
                 }
 
                 else
@@ -552,7 +613,7 @@ createGraph = function(param,type) {
               return 0;
             });
 
-        console.log(dates)
+        // console.log(dates)
 
 
         var points_arrs = Object.keys(graphPoints).map(function (key) {
@@ -609,7 +670,7 @@ createGraph = function(param,type) {
                     .classed(key,true)
                     .attr({
                         r: pointRadius,
-                        cx: function(d,i){console.log(new Date(d.date));return xScaleGraph(new Date(d.date))},
+                        cx: function(d,i){return xScaleGraph(new Date(d.date))},
                         cy: function(d){return yScaleGraph(d[param][type])},
                         fill: function(d) 
                         {
@@ -816,8 +877,127 @@ d3.select("input[value=\"time\"]").on("click", function(){updateGraph('time',gra
 d3.select("input[value=\"Subscriber\"]").on("click", function(){updateGraph(graphStat,'Subscriber'); updateMap(mapMetric, "Subscriber");});
 d3.select("input[value=\"Casual\"]").on("click", function(){updateGraph(graphStat,'Casual'); updateMap(mapMetric, "Casual");});
 
+d3.select("input[value=\"boston\"]").on("click", function(){changeMap('boston');});
+d3.select("input[value=\"chicago\"]").on("click", function(){changeMap('chicago');});
+d3.select("input[value=\"dc\"]").on("click", function(){changeMap('dc');});
+
+// old stuff
 
 
+  // console.log(centroid)
+
+    // var bounds = path.bounds(collection),
+    //     topLeft = bounds[0],
+    //     bottomRight = bounds[1];
+
+    // mapCanvas .attr("width", bottomRight[0] - topLeft[0])
+    //     .attr("height", bottomRight[1] - topLeft[1])
+    //     .style("left", topLeft[0] + "px")
+    //     .style("top", topLeft[1] + "px");
+
+    // mapsvg   .attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
+
+  // if (d && centered !== d) {
+  //   var centroid = path.centroid(d);
+  //   x = centroid[0];
+  //   y = centroid[1];
+  //   k = 3;
+  //   centered = d;
+  // } else {
+  //   x = mapVis.w / 2;
+  //   y = mapVis.h / 2;
+  //   k = 1;
+  //   centered = null;
+  // }
+
+  // mapsvg.selectAll("path")
+  //     .classed("active", centered && function(d) { return d === centered; });
+
+  // mapsvg.transition()
+  //     .duration(750)
+  //     .attr("transform", "translate(" + mapVis.w / 2 + "," + mapVis.h / 2 + ")scale(" + k + ")translate(" + -x + "," + -y + ")")
+  //     .style("stroke-width", 1/k + "px");
 
 
+// boston
+// d3.json("/data/boston.json", function(error, data) {
 
+//     // console.log(data);
+//     projection.scale(100000).center([-71.090813, 42.309228]);
+
+//     var cityMap = topojson.feature(data,data.objects.boston).features;
+//     // console.log(cityMap);
+
+//     mapsvg.selectAll(".city").data(cityMap).enter().append("path")
+//         .attr("class", "city")
+//         .attr("d", path).on("click", clicked);
+//     // see also: http://bl.ocks.org/mbostock/4122298
+
+// });
+
+// chicago
+// d3.json("/data/chicago.json", function(error, data) {
+
+//     // console.log(data);
+//     projection.scale(40000).center([-87.684631, 41.817225]);
+
+//     var cityMap = topojson.feature(data,data.objects.chicago).features;
+//     // console.log(cityMap);
+
+//     mapsvg.selectAll(".city").data(cityMap).enter().append("path")
+//         .attr("class", "city")
+//         .attr("d", path).on("click", clicked);
+//     // see also: http://bl.ocks.org/mbostock/4122298
+
+// });
+
+            // var chart = timeseries_chart(scheme)
+            //         .x(get_time).xLabel("Earthquake origin time")
+            //         .y(get_magnitude).yLabel("Magnitude")
+            //         .brushmove(on_brush);
+
+            // d3.select("body").datum(collection.features).call(chart);
+        // });
+
+        
+    // d3.csv("/data/dc-stations.csv",function(error,data){
+    //     stations = mapsvg.selectAll(".station")
+    //         .data(data)
+    //     .enter().append("circle")
+    //     .filter(function(d) { return (map.latLngToLayerPoint(new L.LatLng(+d["lat"], +d["long"])) != null ) })  
+    //       .attr("class", "station hasData")
+    //       .attr("cx", function(d) { coords = map.latLngToLayerPoint(new L.LatLng(+d["lat"], +d["long"]));
+    //             console.log(coords);
+    //             if (coords != null){return coords.x }})
+    //      .attr("cy", function(d) { coords = map.latLngToLayerPoint(new L.LatLng(+d["lat"], +d["long"]));
+    //             if (coords != null){return coords.y }})
+    //      .attr("r", 5)
+    //      .attr("fill",  scheme[5])
+    //      .attr('stroke', scheme[classes - 1])
+    //      .attr('stroke-width', 1)
+    //     .on('mouseover', station_tip.show)
+    //     .on('mouseout', station_tip.hide);
+
+          // map.on("viewreset", reset);
+          // reset();
+
+          // Reposition the SVG to cover the features.
+       //    function reset() {
+
+       //      var bounds = path.bounds(stations),
+       //          topLeft = bounds[0],
+       //          bottomRight = bounds[1];
+
+       //      // console.log(bounds)
+
+       //      mapCanvas .attr("width", bottomRight[0] - topLeft[0])
+       //          .attr("height", bottomRight[1] - topLeft[1])
+       //          .style("left", topLeft[0] + "px")
+       //          .style("top", topLeft[1] + "px");
+
+       //      mapsvg   .attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
+
+       //  stations.attr("cx", function (d) { return map.latLngToLayerPoint(new L.LatLng(+d["lat"], +d["long"])).x; })
+       // .attr("cy", function (d) { return map.latLngToLayerPoint(new L.LatLng(+d["lat"], +d["long"])).y; });
+   // }
+    // });

@@ -10,7 +10,7 @@ from pprint import pprint
 # convert stations csv to json format
 def stations_json():
 
-    stations = np.recfromcsv('dc-stations.csv', delimiter=',')
+    stations = np.recfromcsv('chi-stations.csv', delimiter=',')
 
     output = {'type': "FeatureCollection", 'features':[]}
 
@@ -21,18 +21,18 @@ def stations_json():
             "id": np.asscalar(s[0]),
             "geometry": {
                 "type":"Point",
-                "coordinates":[np.asscalar(s[2]),np.asscalar(s[1])]
+                "coordinates":[np.asscalar(s[2]),np.asscalar(s[1])] #long, lat
             },
             "geometry_name": "origin_geom",
             "properties": {
                 'name': s[3]
             }})
 
-    f = io.open('dc-stations.json', 'w', encoding='utf-8') 
+    f = io.open('chi-stations.json', 'w', encoding='utf-8') 
     f.write(unicode(json.dumps(output, ensure_ascii=False)))
     f.close()
 
-    json_output=open('dc-stations.json')
+    json_output=open('chi-stations.json')
     output_data = json.load(json_output)
     pprint(output_data)
     json_output.close()
@@ -41,7 +41,4 @@ def stations_json():
 # def merge_stations_weekday():
 
     
-json_output=open('dc-stations.json')
-output_data = json.load(json_output)
-pprint(output_data)
-json_output.close()
+stations_json()
