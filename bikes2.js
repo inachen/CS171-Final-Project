@@ -211,7 +211,7 @@ function circle_style(circles) {
             circles.attr('opacity', 0.2)
                 .attr('stroke', '#4d004b') //scheme[classes - 1])
                 .attr('stroke-width', 1)
-                .attr('fill', scheme[5])
+                .attr('fill', '#B96A9A')//scheme[5])
                 // function (d) {
                 //     if (weekdata[d["id"].toString()]!= null) 
                 //         {return scheme[4];}
@@ -710,12 +710,20 @@ createGraph = function(param,type) {
                         fill: function(d) 
                         {
                             if (key =='dc')
-                                return '#AA0114'
+                                return '#999999'
                             else if (key =='bos')
-                                return '#669966'
+                                return '#993366'
                             else if (key == 'chi')
-                                return '#336699'
+                                return '#669999'
                         }
+                        // {
+                        //     if (key =='dc')
+                        //         return '#AA0114'
+                        //     else if (key =='bos')
+                        //         return '#993366'
+                        //     else if (key == 'chi')
+                        //         return '#336699'
+                        // }
                     })
 
 
@@ -726,12 +734,13 @@ createGraph = function(param,type) {
                     .attr('stroke',function(d) 
                         {
                             if (key =='dc')
-                                return '#AA0114'
+                                return '#999999'
                             else if (key =='bos')
-                                return '#669966'
+                                return '#993366'
                             else if (key == 'chi')
-                                return '#336699'
-                        })
+                                return '#669999'
+                        }
+                        )
 
                 graphCanvas.append('path')
                     .classed('overview_'+key,true)
@@ -740,11 +749,11 @@ createGraph = function(param,type) {
                     .attr('stroke',function(d) 
                         {
                             if (key =='dc')
-                                return '#AA0114'
+                                return '#999999'
                             else if (key =='bos')
-                                return '#669966'
+                                return '#993366'
                             else if (key == 'chi')
-                                return '#336699'
+                                return '#669999'
                         })
             }
         }
@@ -896,11 +905,11 @@ var updateGraph = function(param,type)
                         if (new Date(d.date)>xScaleGraph.domain()[1] || new Date(d.date)<xScaleGraph.domain()[0])
                             return 'none'
                         if (key =='dc')
-                            return '#AA0114'
-                        else if (key =='bos')
-                            return '#669966'
-                        else if (key == 'chi')
-                            return '#336699'
+                                return '#999999'
+                            else if (key =='bos')
+                                return '#993366'
+                            else if (key == 'chi')
+                                return '#669999'
                     }
                 })
 
