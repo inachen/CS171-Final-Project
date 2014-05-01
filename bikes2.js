@@ -552,7 +552,7 @@ createGraph = function(param,type) {
               return 0;
             });
 
-        console.log(dates)
+        //console.log(dates)
 
 
         var points_arrs = Object.keys(graphPoints).map(function (key) {
@@ -565,7 +565,7 @@ createGraph = function(param,type) {
         points = points.concat.apply(points, points_arrs).sort();
         // console.log(points)
 
-        xScaleGraph = d3.time.scale()
+        xScaleGraph = d3.time.scale()//.clamp(true)
                         .domain([dates[0],dates.last()])
                         .range([(graphVis.x+margin.left),(margin.left + graphVis.x+graphVis.w-margin.right)])
         
@@ -609,7 +609,7 @@ createGraph = function(param,type) {
                     .classed(key,true)
                     .attr({
                         r: pointRadius,
-                        cx: function(d,i){console.log(new Date(d.date));return xScaleGraph(new Date(d.date))},
+                        cx: function(d,i){return xScaleGraph(new Date(d.date))},
                         cy: function(d){return yScaleGraph(d[param][type])},
                         fill: function(d) 
                         {
@@ -621,6 +621,8 @@ createGraph = function(param,type) {
                                 return '#336699'
                         }
                     })
+
+
 
                 graphCanvas.append('path')
                     .classed(key,true)
@@ -738,6 +740,9 @@ var updateGraph = function(param,type)
       .scale(yScaleGraph)
       .orient("left");
 
+
+    var filterPointPairs = {};
+
     for (key in Object.keys(graphData))
     {
         if (typeof graphData[Object.keys(graphData)[key]] == "object")
@@ -745,9 +750,12 @@ var updateGraph = function(param,type)
             key = Object.keys(graphData)[key]
             graphPointPairs[key] = graphPoints[key].map(function(d,i) {return [xScaleGraph(graphDates[key][i]),yScaleGraph(d)]})
 
+            filterPointPairs[key] = graphPointPairs[key].filter(function(d) { return (d[0]<xScaleGraph.range()[1] && d[0]>xScaleGraph.range()[0]) })
+
             graphCanvas.selectAll('circle.'+key)
                 .transition()
-                .attr({
+                .attr(
+                {
                     r: pointRadius,
                     cx: function(d){
                         if (key == 'chi' || key == 'bos')
@@ -762,6 +770,8 @@ var updateGraph = function(param,type)
                     cy: function(d){return yScaleGraph(d[param][type])},
                     fill: function(d) 
                     {
+                        if (new Date(d.date)>xScaleGraph.domain()[1] || new Date(d.date)<xScaleGraph.domain()[0])
+                            return 'none'
                         if (key =='dc')
                             return '#AA0114'
                         else if (key =='bos')
@@ -774,9 +784,16 @@ var updateGraph = function(param,type)
 
             graphCanvas.selectAll('path.'+key)
                 .transition()
-                .attr('d','M' + interpolateLinear(graphPointPairs[key]))
- 
+                .attr('d','M' + interpolateLinear(filterPointPairs[key]))
 
+
+
+
+/*
+            graphCanvas.selectAll('path.'+key)
+                .transition()
+                .attr('d','M' + interpolateLinear(graphPointPairs[key]))
+ */
         }
     }
 
@@ -804,7 +821,7 @@ createGraph('dist','Casual');
 // brush function for mouse
 function brushed() {
     //console.log(brush.empty() ? xScaleGraph.domain() : brush.extent())
-    xScaleGraph.domain(brush.empty() ? xScaleGraph.domain() : brush.extent());
+    xScaleGraph.domain(brush.empty() ? xScaleBrush.domain() : brush.extent());
     updateGraph(graphStat,graphType)}
 
 d3.select("input[value=\"dist\"]").on("click", function(){updateGraph('dist',graphType); updateMap('distance', mapRider);});
