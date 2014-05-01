@@ -798,6 +798,48 @@ createGraph = function(param,type) {
             .attr("class", "overview")
             .attr("transform", "translate(" + 0 + "," + (graphVis.h-brushVis.h) + ")");
 
+        var legend_info = {
+            1: {
+                text: 'Boston  ',
+                color: '#993366'
+            },
+            2: {
+                text: 'Chicago  ',
+                color: '#669999'
+            },
+
+            3:{
+                text: "DC  ",
+                color: "#999999"
+            }
+        }
+
+        var count = 0;
+
+        var legend = graphsvg.selectAll(".legend")
+          .data([1,2, 3]).enter()
+          .append("g").attr("class", "legend")
+          .attr("legend-id", function(d) {
+              return count++;
+          })
+          .attr("transform", function(d, i) {
+              return "translate(60," + (i * 20 + 20) + ")";
+          })
+      
+      legend.append("rect")
+          .attr("x", width / 2)
+          .attr("width", 18).attr("height", 18)
+          .attr("transform", "translate(5, 0)")
+          .style("fill", function(d) {
+            console.log(d);
+              return legend_info[d].color;
+          });
+      legend.append("text").attr("x", width / 2)
+          .attr("y", 9).attr("dy", ".35em")
+          .style("text-anchor", "end").text(function(d) {
+              return legend_info[d].text;
+          });
+
         var thisBrush = overview.append("g")
           .attr("class", "x brush")
           .call(brush);
