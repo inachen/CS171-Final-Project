@@ -18,12 +18,7 @@ var centered;
 
 var container = L.DomUtil.get('mapVis');
 
-var brushVis = {
-    x: 100,
-    y: 10*margin.top,
-    w: width - map_width + 20,
-    h: 70
-};
+
 
 // var classes = 9, scheme_id = "BuPu",
 //     scheme = colorbrewer[scheme_id][classes],
@@ -31,11 +26,17 @@ var brushVis = {
 
 var graphVis = {
     x: 100,
-    y: (brushVis.h + brushVis.y),
+    y: 30,
     w: width - map_width + 20,
-    h: 750
+    h: 700
 };
 
+var brushVis = {
+    x: 100,
+    y: 0.9*graphVis.h,
+    w: width - map_width + 20,
+    h: 170
+};
 
 var mapVis = {
     x: 10,
@@ -46,7 +47,7 @@ var mapVis = {
 
 var graphCanvas = d3.select("#graphVis").append("svg").attr({
     width: graphVis.w +200+ margin.left + margin.right,
-    height: ((map_height + margin.top + margin.bottom) > (graphVis.y + graphVis.h - brushVis.y + margin.top + margin.bottom)) ? (map_height + margin.top + margin.bottom) : (graphVis.y + graphVis.h - brushVis.y + margin.top + margin.bottom)
+    height: ((map_height + margin.top + margin.bottom) > (brushVis.y + brushVis.h - graphVis.y + margin.top + margin.bottom)) ? (map_height + margin.top + margin.bottom) : (brushVis.y + brushVis.h - graphVis.y + margin.top + margin.bottom)
     //height: map_height + margin.top + margin.bottom
 });
 
@@ -525,7 +526,7 @@ loadMap(mapCity);
 // graph vis
 // -----------------------------------
 
-var pointRadius = 1.5;
+var pointRadius = 1.2;
 
 var xScaleGraph, yScaleGraph;
 
@@ -543,7 +544,7 @@ interpolateLinear = function(point_arr) {
 var graphObjs = {};
 var graphDates = {};
 
-var dc_dates,dc_objs,dc_points,chi_dates,chi_objs,chi_points,bos_dates,bos_objs,bos_points,dates,points,xScaleGraph,yScaleGraph,xScaleBrush,brush, area_detail, path_detail;
+var dc_dates,dc_objs,dc_points,chi_dates,chi_objs,chi_points,bos_dates,bos_objs,bos_points,dates,points,xScaleGraph,yScaleGraph,xScaleBrush,brush, area_detail, path_detail,yScaleBrush;
 
 createGraph = function(param,type) {
 
@@ -551,6 +552,7 @@ createGraph = function(param,type) {
     {
         var graphPoints= {}
         var graphPointPairs = {}
+        var brushPointPairs = {}
 
         graphType = type
         graphStat = param
@@ -561,11 +563,22 @@ createGraph = function(param,type) {
 
 
 
-        for (key in Object.keys(graphData))
+        for (var key in Object.keys(graphData))
         {
             if (typeof graphData[Object.keys(graphData)[key]] == "object")
             {
                 key = Object.keys(graphData)[key]
+
+                // fix units
+                for (var obj in graphData[key])
+                {
+                    obj = graphData[key][obj]
+                    obj.time.Casual /=  60
+                    obj.time.Subscriber /= 60
+                    obj.speed.Casual *= 3600
+                    obj.speed.Subscriber *= 3600
+
+                }
 
 //                 // console.log(key)
 //                 graphDates[key] = Object.keys(graphData[key]).sort()
@@ -602,6 +615,7 @@ createGraph = function(param,type) {
         var dates_arrs = Object.keys(graphDates).map(function (key) {
             return graphDates[key]
         })
+        console.log(graphDates)
 
         var dates = [];
 
@@ -630,7 +644,7 @@ createGraph = function(param,type) {
         
         xScaleBrush = d3.time.scale()
                         .domain([dates[0],dates[dates.length-1]])
-                        .range([0,(graphVis.w)])
+                        .range([(brushVis.x+margin.left),(margin.left + brushVis.x+brushVis.w-margin.right)])
 
         brush = d3.svg.brush()
             .x(xScaleBrush)
@@ -639,6 +653,10 @@ createGraph = function(param,type) {
         yScaleGraph = d3.scale.linear()
             .domain([(points.min()*0.9),(points.max()*1.1)])
             .range([graphVis.y+graphVis.h-margin.top-300,graphVis.y+margin.top])
+
+        yScaleBrush = d3.scale.linear()
+            .domain([(points.min()*0.9),(points.max()*1.1)])
+            .range([brushVis.y+margin.top,brushVis.y+brushVis.h-margin.top-300])
 
         var xAxisGraph = d3.svg.axis()
           .scale(xScaleGraph)
@@ -652,7 +670,9 @@ createGraph = function(param,type) {
           .scale(xScaleBrush)
           .orient("bottom");
 
-
+        var yAxisBrush = d3.svg.axis()
+          .scale(yScaleBrush)
+          .orient("left");
 
         for (key in Object.keys(graphData))
         {
@@ -661,6 +681,8 @@ createGraph = function(param,type) {
                 key = Object.keys(graphData)[key]
                 graphPointPairs[key] = graphPoints[key].map(function(d,i) {return [xScaleGraph(graphDates[key][i]),yScaleGraph(d)]})
 
+                brushPointPairs[key] = graphPoints[key].map(function(d,i) {return [xScaleBrush(graphDates[key][i]),yScaleBrush(d)]})
+
                 graphCanvas.selectAll('circle.'+key)
                     .data(graphObjs[key])
                     .enter()
@@ -668,7 +690,7 @@ createGraph = function(param,type) {
                     .classed(key,true)
                     .attr({
                         r: pointRadius,
-                        cx: function(d,i){return xScaleGraph(new Date(d.date))},
+                        cx: function(d,i){return xScaleGraph(graphDates[key][i])},
                         cy: function(d){return yScaleGraph(d[param][type])},
                         fill: function(d) 
                         {
@@ -682,10 +704,23 @@ createGraph = function(param,type) {
                     })
 
 
-
                 graphCanvas.append('path')
                     .classed(key,true)
                     .attr('d','M' + interpolateLinear(graphPointPairs[key]))
+                    .attr('fill','none')
+                    .attr('stroke',function(d) 
+                        {
+                            if (key =='dc')
+                                return '#AA0114'
+                            else if (key =='bos')
+                                return '#669966'
+                            else if (key == 'chi')
+                                return '#336699'
+                        })
+
+                graphCanvas.append('path')
+                    .classed('overview_'+key,true)
+                    .attr('d','M' + interpolateLinear(brushPointPairs[key]))
                     .attr('fill','none')
                     .attr('stroke',function(d) 
                         {
@@ -712,9 +747,9 @@ createGraph = function(param,type) {
 
         graphCanvas.append("g")
             .classed("axis",true)
-            .classed("brusher",true)
+            .classed("xbrusher",true)
             .call(xAxisBrush)
-            .attr("transform", "translate(" + (brushVis.x) + "," + (brushVis.y) + ")")
+            .attr("transform", "translate(" + 0 + "," + (brushVis.y+margin.top) + ")")
             .selectAll('text')
             .style("text-anchor", "end")
             .attr("transform", function(d) {
@@ -729,9 +764,15 @@ createGraph = function(param,type) {
             .call(yAxisGraph)
             .attr("transform", "translate("+ xScaleGraph.range()[0] +"," + 0 + ")");
 
+        graphCanvas.append("g")
+            .classed("axis",true)
+            .classed("ybrusher",true)
+            .call(yAxisBrush)
+            .attr("transform", "translate("+ xScaleGraph.range()[0] +"," + 0 + ")");
+
         var overview = graphCanvas.append("g")
             .attr("class", "overview")
-            .attr("transform", "translate(" + brushVis.x + "," + brushVis.y + ")");
+            .attr("transform", "translate(" + 0 + "," + (graphVis.h-brushVis.h) + ")");
 
         var thisBrush = overview.append("g")
           .attr("class", "x brush")
@@ -752,6 +793,7 @@ var updateGraph = function(param,type)
     
     var graphPoints= {}
     var graphPointPairs = {}
+    var brushPointPairs = {}
 
     for (key in Object.keys(graphData))
     {
@@ -790,6 +832,10 @@ var updateGraph = function(param,type)
     yScaleGraph = d3.scale.linear()
         .domain([(points.min()*0.9),(points.max()*1.1)])
         .range([graphVis.y+graphVis.h-margin.top-300,graphVis.y+margin.top])
+
+    yScaleBrush = d3.scale.linear()
+        .domain([(points.min()*0.9),(points.max()*1.1)])
+        .range([brushVis.y+margin.top,brushVis.y+brushVis.h-margin.top-300])
         
     xAxisGraph = d3.svg.axis()
       .scale(xScaleGraph)
@@ -808,6 +854,9 @@ var updateGraph = function(param,type)
         {
             key = Object.keys(graphData)[key]
             graphPointPairs[key] = graphPoints[key].map(function(d,i) {return [xScaleGraph(graphDates[key][i]),yScaleGraph(d)]})
+
+
+            brushPointPairs[key] = graphPoints[key].map(function(d,i) {return [xScaleBrush(graphDates[key][i]),yScaleBrush(d)]})
 
             filterPointPairs[key] = graphPointPairs[key].filter(function(d) { return (d[0]<xScaleGraph.range()[1] && d[0]>xScaleGraph.range()[0]) })
 
@@ -848,11 +897,11 @@ var updateGraph = function(param,type)
 
 
 
-/*
-            graphCanvas.selectAll('path.'+key)
+
+            graphCanvas.selectAll('path.overview_'+key)
                 .transition()
-                .attr('d','M' + interpolateLinear(graphPointPairs[key]))
- */
+                .attr('d','M' + interpolateLinear(brushPointPairs[key]))
+ 
         }
     }
 
