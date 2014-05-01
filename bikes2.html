@@ -43,7 +43,7 @@
 
     html {
       /*text-align: right;*/
-      background-image:url('images/bikesbg.png');
+      /*background-image:url('images/bikesbg.png');*/
       background-position: right bottom;
       /*background-attachment:fixed;*/
       background-size: 65%;
@@ -297,6 +297,20 @@
       padding-top: 20px;
     }
 
+    div#imgdiv{
+      text-align: right;
+      width: 100%;
+      margin-top: -250px;
+    }
+
+    .storydiv{
+      padding-left: 75px;
+      padding-right: 75px;
+      color: #525252;
+      font-size: 13px;
+    }
+
+
 
 </style>
 
@@ -311,6 +325,47 @@
     <input class="mapinput" id="map3" type="radio" name="type" value="dc" > <label for="map3" > DC </label>
   </form>
   <div id="mapVis" class="mapVis"></div></td></tr>
+  <tr style="width: 100%;"><td colspan='2' style="width: 100%;"><div id="imgdiv" style="text-align: right"><img id="bikeimg" style="height:auto; width:auto; float:right; max-width:850px;"src="images/bikesbg.png"></img></div></td></tr>
+  <tr><td ><div class="storydiv">
+
+    <h1> Introduction </h1>
+
+    <p> Bike sharing is an increasingly popular mode of transportation within large cities such as Boston, New York, Chicago, D.C., and others. Unlike ride shares or car pooling where location and rides are relatively easy to adjust to rider volume and locations, bike sharing requires infrastructure carefully planned to accommodate riders at convenient locations and stocked to ensure availability of bikes. As the number of bike share users increases, it becomes increasingly useful for both bike program planners and bike share users to look at ride patterns in order to manage bike distribution or plan trips. For these reasons, a few bike share programs have released data on ride trips to encouraged clear and creative visualization through visualization challenges. Here, we take advantage of these available bike share data in three cities, Boston, Chicago, and Washington, D.C. to understand bike share usage in these three cities. We calculated four trip metrics from the bike data (average distance traveled, average speed of trips, total trips, and average trip duration) and divided the trips between trips by subscription riders (those paying subscriptions for bike usage) and casual riders (typically one-time or occasional users). These two sets of filters can be used to explore different facets of the data on both an overview and geographical scale (left and right in the visualization above). Using this visualization, we have discovered interesting patterns in bike usage between cities and between different groups of users as detailed below. We encourage you to explore the data to discover more for yourself!</p>
+
+    <p>The overview focus of our visualization is to compare ride patterns between cities. There has been some visualizations of bike share data within individual cities, but we found few that compared bike share patterns between cities.  </p>
+    
+
+  </div></td><td ><div class="storydiv">
+
+    <h1> Using the Visualization </h1>
+
+    <h3> 1. Control Bar </h3>
+
+    <p>
+      From top row, select a metric to display data of this metric in both the overview graph and map visualization. The four metrics are average distance traveled in a trip, average speed of trips, total trips (this metric is not averaged over days), and average trip duration.<br>
+      <br>
+      From the bottom row, select the rider type, either casual riders or subscriber riders, to display. All three bike programs offer both subscriptions, aimed at riders who would frequently use bikes such as for commuting, and pay-per-trip, aimed at occasional riders or tourists.<br>
+      <br>
+      Note: Some bike programs charge extra for long-distance rides. Users often swap bikes at intermediate stations to avoid this charge. The distance traveled per trip metric does not take this into account and counts each leg of the trip separately.
+    </p>
+
+    <h3> 2. Overview Graph </h3>
+
+    <p>
+      The overview graph displays ride data from October 2012 to December 2013. Missing 
+    </p>
+
+    <h3> 3. Map Visualization </h3>
+
+    <p>
+
+    </p>
+
+    <h3> Enjoy! </h3>
+
+  </div></td>
+
+  </tr>
     <!-- <tr><td><div id="buttons"></div></td></tr> -->
     <!-- <tr><td><div id="mapVis"></div></td></tr> -->
 </table>

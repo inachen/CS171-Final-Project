@@ -404,7 +404,7 @@ function loadStats(subkey, typekey, city){
             return (value != 0);
         }));
 
-            radius_scale = d3.scale.linear().domain([min, max]).range([3, 11]);
+            radius_scale = d3.scale.linear().domain([min, max]).range([3, 10]);
 
             // console.log(radius_scale);
 
@@ -823,7 +823,7 @@ createGraph = function(param,type) {
               return count++;
           })
           .attr("transform", function(d, i) {
-              return "translate(60," + (i * 20 + 20) + ")";
+              return "translate(60," + (i * 20 + 10) + ")";
           })
       
       legend.append("rect")
