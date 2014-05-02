@@ -136,27 +136,27 @@ var city_info = {
         zoomlat: 42.329228,
         zoomlong: -71.090813,
         zoomlvl: 11, 
-        mapfile: "/data/boston.geojson",
-        datafile: "/data/bos_map_weekday_stats.json",
-        stationfile: "/data/bos-stations.json",
+        mapfile: "boston.geojson",
+        datafile: "bos_map_weekday_stats.json",
+        stationfile: "bos-stations.json",
         loaded: false
     },
     "chicago": {
         zoomlat: 41.817225,
         zoomlong: -87.684631,
         zoomlvl: 10,
-        mapfile: "/data/zchicago.geojson",
-        datafile: "/data/chi_map_weekday_stats.json",
-        stationfile: "/data/chi-stations.json",
+        mapfile: "zchicago.geojson",
+        datafile: "chi_map_weekday_stats.json",
+        stationfile: "chi-stations.json",
         loaded: false
     },
     "dc": {
         zoomlat: 38.934156,
         zoomlong: -77.05386,
         zoomlvl: 10,
-        mapfile: "/data/washington.geojson",
-        datafile: "/data/dc_map_weekday_stats.json",
-        stationfile: "/data/dc-stations.json",
+        mapfile: "washington.geojson",
+        datafile: "dc_map_weekday_stats.json",
+        stationfile: "dc-stations.json",
         loaded: false
     }
 }
