@@ -14,4 +14,4 @@ The interface is fairly straightforward. There are two sets of toggles at the to
 
 
 Leaflet from
-https://github.com/codeforamerica/click_that_hood/- borrowed from http://bl.ocks.org/tnightingale/4718717 for implement stationsgithub7. 
+https://github.com/codeforamerica/click_that_hood/  borrowed from http://bl.ocks.org/tnightingale/4718717 for implement stationsgithub7. 
