@@ -291,7 +291,7 @@ map.on('popupopen', function(e){
 
     var pop_yScale = d3.scale.linear().domain([0, pop_data.max()])
         .rangeRound([100, 10]);
-    var pop_xScale = d3.scale.ordinal().domain(['Su', 'M', 'T', 'W', 'Th', 'F', 'S'])
+    var pop_xScale = d3.scale.ordinal().domain(['M', 'T', 'W', 'Th', 'F', 'S', 'Su'])
         .range([70, 90, 110, 130, 150, 170, 190, 210]);
 
     var weeks = ['M', 'T', 'W', 'Th', 'F', 'S', 'Su']
