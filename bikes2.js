@@ -294,7 +294,7 @@ map.on('popupopen', function(e){
     var pop_xScale = d3.scale.ordinal().domain(['Su', 'M', 'T', 'W', 'Th', 'F', 'S'])
         .range([70, 90, 110, 130, 150, 170, 190, 210]);
 
-    var weeks = ['Su', 'M', 'T', 'W', 'Th', 'F', 'S']
+    var weeks = ['M', 'T', 'W', 'Th', 'F', 'S', 'Su']
 
     var pop_yAxis = d3.svg.axis().scale(pop_yScale).orient("left").ticks(6).tickFormat(d3.format(".1f"));
     var pop_xAxis = d3.svg.axis().scale(pop_xScale).orient("bottom");
