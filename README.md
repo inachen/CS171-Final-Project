@@ -1,8 +1,7 @@
-CS171-Final-Project
+BIKES ON PARADE!!
 ===================
 
-
-Here is Bikes on Parade!! A visualization system for comparing bikeshare systems across three different American cities.
+Finally, a visualization system for comparing bikeshare systems across three different American cities.
 
 
 The files "bikes2.js" is the workhorse of our system. It references various datasets (combo_stats.json, bos_map_weekday_stats.json, dc_map_weekday_stats.json, chi_map_weekday_stats.json) we use to generate what you see on the page. The code contained in bikes2 is original, however it employs several libraries including Leaflet, a custom points layer script for Leaflet (linked below), and, of course, D3. Other files are largely differently shaped datasets which other developers might find useful but were not ultimately invoked in this project.
