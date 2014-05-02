@@ -10,6 +10,13 @@ var view = {
     h: 700
 }
 
+var unit = {
+    dist: 'miles',
+    speed: 'mph',
+    time: 'minutes',
+    rides: 'number of rides'
+}
+
 var width = view.w - margin.left - margin.right;
 var height = view.h - margin.bottom - margin.top;
 var map_width = 600;
@@ -557,7 +564,7 @@ interpolateLinear = function(point_arr) {
 var graphObjs = {};
 var graphDates = {};
 
-var dc_dates,dc_objs,dc_points,chi_dates,chi_objs,chi_points,bos_dates,bos_objs,bos_points,dates,points,xScaleGraph,yScaleGraph,xScaleBrush,brush, area_detail, path_detail,yScaleBrush;
+var dc_dates,dc_objs,dc_points,chi_dates,chi_objs,chi_points,bos_dates,bos_objs,bos_points,dates,points,xScaleGraph,yScaleGraph,xScaleBrush,brush, area_detail, path_detail,yScaleBrush,units;
 
 createGraph = function(param,type) {
 
@@ -816,31 +823,31 @@ createGraph = function(param,type) {
             }
         }
 
-        var count = 0;
+      //   var count = 0;
 
-        var legend = graphsvg.selectAll(".legend")
-          .data([1,2, 3]).enter()
-          .append("g").attr("class", "legend")
-          .attr("legend-id", function(d) {
-              return count++;
-          })
-          .attr("transform", function(d, i) {
-              return "translate(60," + (i * 20 + 10) + ")";
-          })
+      //   var legend = graphsvg.selectAll(".legend")
+      //     .data([1,2, 3]).enter()
+      //     .append("g").attr("class", "legend")
+      //     .attr("legend-id", function(d) {
+      //         return count++;
+      //     })
+      //     .attr("transform", function(d, i) {
+      //         return "translate(60," + (i * 20 + 10) + ")";
+      //     })
       
-      legend.append("rect")
-          .attr("x", width / 2)
-          .attr("width", 18).attr("height", 18)
-          .attr("transform", "translate(5, 0)")
-          .style("fill", function(d) {
-            console.log(d);
-              return legend_info[d].color;
-          });
-      legend.append("text").attr("x", width / 2)
-          .attr("y", 9).attr("dy", ".35em")
-          .style("text-anchor", "end").text(function(d) {
-              return legend_info[d].text;
-          });
+      // legend.append("rect")
+      //     .attr("x", width / 2)
+      //     .attr("width", 18).attr("height", 18)
+      //     .attr("transform", "translate(5, 0)")
+      //     .style("fill", function(d) {
+      //       console.log(d);
+      //         return legend_info[d].color;
+      //     });
+      // legend.append("text").attr("x", width / 2)
+      //     .attr("y", 9).attr("dy", ".35em")
+      //     .style("text-anchor", "end").text(function(d) {
+      //         return legend_info[d].text;
+      //     });
 
         var thisBrush = overview.append("g")
           .attr("class", "x brush")
@@ -855,20 +862,29 @@ createGraph = function(param,type) {
         var LEGENNNND = graphCanvas.append('foreignObject')
             .classed('legendBox',true)
             .attr('x',xScaleGraph.range()[1]-70)
-            .attr('y',yScaleGraph.range()[1]+10)
+            .attr('y',yScaleGraph.range()[1]-20)
             .attr('width', 120)
             .attr('height', 100)
-            .style('font','Courier New')
+            // .style('font','Courier New')
             .append("xhtml:body")
-            .html('<div style="border-radius: 10px 10px 10px 10px;text-align:center;background-color: #AA0114;color:#FFFFFF;" class="legend" width="60">Washington D.C.</div>   <hr style=" border-radius: 10px 10px 10px 10px;margin:0px; height:2px; visibility:hidden;" />  <div class="legend" style="border-radius: 10px 10px 10px 10px;text-align:center; background-color: #669966;color:#FFFFFF;" width="60">Boston</div>  <hr style="margin:0px; height:2px; visibility:hidden;" />  <div style=" border-radius: 10px 10px 10px 10px;text-align:center; background-color: #336699;color:#FFFFFF;" class="legend" width="60">Chicago</div>')
-            .style('font','Arial')
+            .html('<div style="border-radius: 10px 10px 10px 10px;text-align:center;background-color: '+legend_info[3].color+';color:#FFFFFF;" class="legend" width="60">Washington D.C.</div>   <hr style=" border-radius: 10px 10px 10px 10px;margin:0px; height:2px; visibility:hidden;" />  <div class="legend" style="border-radius: 10px 10px 10px 10px;text-align:center; background-color: '+legend_info[1].color+';color:#FFFFFF;" width="60">Boston</div>  <hr style="margin:0px; height:2px; visibility:hidden;" />  <div style=" border-radius: 10px 10px 10px 10px;text-align:center; background-color: '+legend_info[2].color+';color:#FFFFFF;" class="legend" width="60">Chicago</div>')
 
-                            if (key =='dc')
-                                return '#AA0114'
-                            else if (key =='bos')
-                                return '#669966'
-                            else if (key == 'chi')
-                                return '#336699'
+        units = graphCanvas.append('foreignObject')
+            .classed('legendBox',true)
+            .attr('x',xScaleGraph.range()[0]-100)
+            .attr('y',yScaleGraph.range()[1]-30)
+            .attr('width', 120)
+            .attr('height', 100)
+            // .style('font','Courier New')
+            .append("xhtml:body")
+            .html('<div style="border-radius: 10px 10px 10px 10px;text-align:center;color: #999999;" class="legend" width="60">' + unit[param] + '</div>')
+
+                            // if (key =='dc')
+                            //     return legend_info[3].color
+                            // else if (key =='bos')
+                            //     return legend_info[1].color
+                            // else if (key == 'chi')
+                            //     return legend_info[2].color
 
           console.log(xScaleGraph.range()[1],LEGENNNND)
 
@@ -1009,6 +1025,10 @@ var updateGraph = function(param,type)
         .transition()
         .call(yAxisGraph)
         .attr("transform", "translate("+ xScaleGraph.range()[0] +"," + 0 + ")")
+
+    //console.log(units.html())
+
+    units.html('<div style="border-radius: 10px 10px 10px 10px;text-align:center;color: #999999;" class="legend" width="60">' + unit[param] + '</div>')
 
 }
 
