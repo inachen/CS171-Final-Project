@@ -330,49 +330,26 @@
 
     <h1> Introduction </h1>
 
-    <p> Bike sharing is an increasingly popular mode of transportation within large cities such as Boston, New York, Chicago, D.C., and others. Unlike ride shares or car pooling where location and rides are relatively easy to adjust to rider volume and locations, bike sharing requires infrastructure carefully planned to accommodate riders at convenient locations and stocked to ensure availability of bikes. As the number of bike share users increases, it becomes increasingly useful for both bike program planners and bike share users to look at ride patterns in order to manage bike distribution or plan trips. For these reasons, a few bike share programs have released data on ride trips to encouraged clear and creative visualization through visualization challenges. Here, we take advantage of these available bike share data in three cities, Boston (Hubway), Chicago (Divvy), and Washington, D.C (Capital Bikeshare). to understand bike share usage in these three cities. We calculated four trip metrics from the bike data (average distance traveled, average speed of trips, total trips, and average trip duration) and divided the trips between trips by subscription riders (those paying subscriptions for bike usage) and casual riders (typically one-time or occasional users). These two sets of filters can be used to explore different facets of the data on both an overview and geographical scale (left and right in the visualization above). Using this visualization, we have discovered many interesting patterns in bike usage between cities and between different groups of users, several of which is detailed below. We encourage you to explore the data to discover more for yourself!</p>
+    <p> Bike sharing is an increasingly popular mode of transportation within large cities such as Boston, New York, Chicago, D.C., and others. Unlike ride shares or car pooling where location and rides are relatively easy to adjust to rider volume and locations, bike sharing requires infrastructure carefully planned to accommodate riders at convenient locations and stocked to ensure availability of bikes. As the number of bike share users increases, it becomes increasingly useful for both bike program planners and bike share users to look at ride patterns in order to manage bike distribution or plan trips. For these reasons, a few bike share programs have released data on ride trips to encouraged clear and creative visualization through visualization challenges. Here, we take advantage of these available bike share data in three cities, Boston (Hubway), Chicago (Divvy), and Washington, D.C (Capital Bikeshare). to understand bike share usage in these three cities. We calculated four trip metrics from the bike data (average distance traveled, average speed of trips, total trips, and average trip duration) and divided the trips between trips by subscription riders (those paying subscriptions for bike usage) and casual riders (typically one-time or occasional users). These two sets of filters can be used to explore different facets of the data on both an overview and geographical scale (left and right in the visualization above). Using this visualization, we have discovered interesting patterns in bike usage between cities and between different groups of users as detailed below. We encourage you to explore the data to discover more for yourself!</p>
 
-
-    <h1> Objectives </h1>
-    <p>The first objective of our visualization is to compare ride patterns between cities. There has been some visualizations of bike share data within individual cities, but we found few that compared bike share patterns between cities. Comparisons of trends between these three cities have yielded interesting results as well as similarities due to common features shared by these three cities (large cities in the Northeast) </p>
-
-    <p>The second objective of our visualization is to display the data with attention to the very geographical nature of biking data. The same data plotted on the overview graph on the left is added to the map where the size of the bubble correlate with the average data for the station and the weekly break down given in the popup. </p>
+    <p>The overview focus of our visualization is to compare ride patterns between cities. There has been some visualizations of bike share data within individual cities, but we found few that compared bike share patterns between cities.  </p>
     
     <h1> Stories </h1>
 
     <h3>1. Overall Trends between Cities</h3>
-    <p> We see that there are overall higher numbers of subscriber trips in DC than in Boston or Chicago (left). This may be a result of the Capital Bikeshare program in DC being an older program (compared to Divvy Chicago which only started in June, 2013). However, although the Chicago program only started in 2013, the casual riders have quickly picked up the program as seen by the high peaks in for the total trips for casual riders (right).<br>
-      <br>
+    <p> We see that there are overall higher numbers of subscriber trips in DC than in Boston or Chicago (left). This may be a result of the Capital Bikeshare program in DC being an older program (compared to Divvy Chicago which only started in June, 2013). However, although the Chicago program only started in 2013, the casual riders have quickly picked up the program as seen by the high peaks in for the total trips for casual riders (right). Other trends that can be found by looking at the trends at large include DC subscribers ride slower than subscribers in other cities but DC casual ride faster than in other others. This may be due to the fact that DC casual riders are concentrated in the Tidal Basin area - shown in story #4 - which does not have much traffic) </p><br> <br>
+
       <img style="height:auto; width:auto; float:center; max-width:300px;"src="images/overall-left.png"></img>
-      <img style="height:auto; width:auto; float:center; max-width:300px;"src="images/overall-right.png"></img><br>
-     Other trends that can be found by looking at the trends at large include DC subscribers ride slower than subscribers in other cities but DC casual ride faster than in other others. This may be due to the fact that DC casual riders are concentrated in the Tidal Basin area - shown in story #4 - which does not have much traffic) </p>
+      <img style="height:auto; width:auto; float:center; max-width:300px;"src="images/overall-right.png"></img>
     <h3>2. Seasonal Usage</h3>
-    <p> From the photos above we can see that the total rides taper off as the wintry seasons approach in all three cities. This is consistent with the fact that all three cities are in the northeastern United States where winters are never particularly kind to bikers. More interestingly, and contrary to common sense, the average speed of rides are faster in winter than in summer (see image below). Although people may bike slower in nice weather to enjoy the scenery, it might be good for companies to warn riders to ride slowly in adverse conditions to avoid biking accidents. <br>
-      <br>
-    <img style="height:auto; width:auto; float:center; max-width:300px;"src="images/seasons.png"></img>  </p>
+    
     <h3>3. Weekly Usage </h3>
-    <p> Zooming in on the overview data and browsing the popups reveal interesting patterns about the trip volume for subscriber and casual riders. We see almost an entire flip as we switch between trip numbers for subscriber riders (top left) and casual riders (top right). Subscriber ride volume is high in the five weekdays and drops off for the weekends (highly indicative of commuting patterns) where as casual ride volume is low on the weekdays and spikes up on the weekends. Similar trends can be observed for certain stations, such as stations close to college campus (bottom left: Subscriber ride volume, bottom right: Casual ride volume).  <br>
-      <br>
-      Overview:<br>
-     <img style="height:auto; width:auto; float:center; max-width:300px;"src="images/week1left.png"></img>
-      <img style="height:auto; width:auto; float:center; max-width:300px;"src="images/week1right.png"></img><br>
-      <br>
-      Popups (I wonder where all the MIT students are heading out): <br>
-      <br>
-       <img style="height:auto; width:auto; float:center; max-width:300px;"src="images/week2left.png"></img>
-        <img style="height:auto; width:auto; float:center; max-width:300px;"src="images/week2right.png"></img> </p>
+    <p> speed, total trips,  both overview and in popups!, sub vs casual </p>
     <h3>4. Stations Usage </h3>
-    <p> Not only do subscribers and casual riders vary in their choice of days to use the bike, they also vary in choice of locations to pick up their bikes. Looking at downtown DC, we see a clear switch in subscriber (left) versus casual user (right) choice of stations. Casual riders prefer to pick up their bikes around the Washington Mall/Tidal Basin area, possibly as a result of the high volume of tourists in that area where as subscribers are more concentrated towards the downtown area where many commuters may work.<br><br>
-    <img style="height:auto; width:auto; float:center; max-width:300px;"src="images/location-left.png"></img>
-        <img style="height:auto; width:auto; float:center; max-width:300px;"src="images/location-right.png"></img> </p>
+    <p> DC total trips casual vs subscriber </p>
     <h3>5. See the Cherry Blossoms in DC</h3>
-    <p> When looking at the average speed of trips, there was an interesting drop in the casual riders average speed in the DC data (right) that was not present in the average speed of subscriber ride trips (left). On a closer look, we see that this drop fell into the last week of March, which coincidentally was the start of the Cherry Blossom Festival in Washington DC (commenced March 20th in 2013). Perhaps tourists casually picking up a bike to see the blossoms?<br><br>
-     <img style="height:auto; width:auto; float:center; max-width:300px;"src="images/cherry-left.png"></img>
-        <img style="height:auto; width:auto; float:center; max-width:300px;"src="images/cherry-right.png"></img> </p>
     <h3>6. Boston Marathon 2012</h3>
-    <p> Another interesting peak we saw was for the average distance per trip in the Boston data. A spike in average distance per trip was observed in the casual rider group (right) but not in the subscriber rider group (left) on April 15, 2013. As you may remember, this was the day of the Boston Marathon and bombing in 2013. Could this be related? Of interesting note, only distance variable and (slightly) duration but no other metrics <br><br>
-      <img style="height:auto; width:auto; float:center; max-width:300px;"src="images/marathon-left.png"></img>
-        <img style="height:auto; width:auto; float:center; max-width:300px;"src="images/marathon-right.png"></img> </p>
+    <p> only distance and kind of duration but nothing else </p>
 
   </div></td><td ><div class="storydiv">
 
@@ -391,7 +368,7 @@
     <h3> 2. Overview Graph </h3>
 
     <p>
-      The overview graph (left) displays ride data from October 2012 to December 2013. The display in the detail frame (top) can be controlled by brushing (drag mouse over the graph) over the overview frame (bottom). Click outside the brush to restore the detail frame. The brushing can be finely controlled to show data over a month or a week.<br>
+      The overview graph (left) displays ride data from October 2012 to December 2013. The display in the detail frame (top) can be controlled by brushing (drag mouse over the graph) over the overview frame (bottom). Click outside the brush to restore the detail frame.<br>
 
       <br>
       Note: The three datasets we used had gaps in this time period as seen on the graph. Chicago Divvy only provided 6 month data, DC Capital Bikeshare only gave the annual data, and Boston Hubway did not offer service during the winter months in 2012.
@@ -400,7 +377,7 @@
     <h3> 3. Map Visualization </h3>
 
     <p>
-      The map visualization (right) displays the ride metric for rides outgoing from each station which is plotted on the map. The size of the bubble for each station is scaled to the current metric. Zoom in and out of the map using the +/- on the top left corner or the mouse scrollwheel. Switching between maps for different cities can be done with the controls above the map. <br>
+      The map visualization (right) displays the ride metric for rides outgoing from each station which is plotted on the map. The size of the bubble for each station is scaled to the current metric. Zoom in and out of the map using the +/- on the top left corner or the mouse scrollwheel <br>
       <br>
       Neighborhoods in each city is outlined in gray. Hover over a neighborhood to see its name. <br>
       <br>
@@ -411,15 +388,13 @@
 
     <h1> Screencast </h1>
 
-    <iframe width="450" height="315" src="//www.youtube.com/embed/5TfZJ-XvKR8" frameborder="0" allowfullscreen></iframe>
+    <iframe width="200" height="315" src="//www.youtube.com/embed/5TfZJ-XvKR8" frameborder="0" allowfullscreen></iframe>
 
     <h1> Links </h1>
 
-    <a href="http://capitalbikeshare.com/trip-history-data">DC Capital Bikeshare rides data</a><br><br>
-    <a href="http://capitalbikeshare.com/data/stations/bikeStations.xml">DC Capital Bikeshare station data</a><br><br>
-    <a href="http://hubwaydatachallenge.org/">Boston Hubway data</a><br><br>
-    <a href="https://divvybikes.com/datachallenge">Chicago Divvy Bikeshare rides data</a><br><br>
-    <a href="https://data.cityofchicago.org/api/views/bbyy-e7gq/rows.xls?accessType=DOWNLOAD">Chicago Divvy Bikeshare rides data</a><br><br>
+    <a href="url">Chicago Divvy data</a><br>
+    <a href="url">Boston Hubway data</a><br>
+    <a href="url">DC Capital Bikeshare data</a><br>
     <a href="process_book.pdf">Process Book</a><br>
   </div></td>
 
